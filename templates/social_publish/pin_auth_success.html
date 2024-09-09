@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+    <div class="container">
+        {% if auth_failed %}
+            <div class="alert alert-danger" role="alert">
+                Authentication failed. Please try again.
+            </div>
+        {% endif %}
+
+        <h1>Successful Pinterest Authentication</h1>
+        <h3>User Stats:</h3>
+        <p>User ID: {{ user_id }}</p>
+        <p>Username: {{ username }}</p>
+        <!-- Display other user stats here -->
+
+        <h3>Boards:</h3>
+        <ul>
+            {% for board in boards %}
+                <li>{{ board.name }}</li>
+            {% endfor %}
+        </ul>
+
+        <form method="POST" action="{% url 'create_board' %}">
+            {% csrf_token %}
+            <label for="board_name">New Board Name:</label>
+            <input type="text" id="board_name" name="board_name">
+            <button type="submit">Create New Board</button>
+        </form>
+    </div>
+{% endblock %}

@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block content %}
+    <div class="mx-auto" style="width: 200px;">
+        Search Results
+    </div>
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th scope="col">Keyword</th>
+                        <th scope="col">Count</th>
+                        <th scope="col">Frequency</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for month in search_res %}
+                        {% if month %}
+                            <thead class="thead-light">
+                            <tr class="table-secondary">
+                                <th>{{ month|last }}</th>
+                                <th></th>
+                                <th></th>
+                            </tr>
+                            </thead>
+                        {% endif %}
+                        {% for res in month|first %}
+                            {% if res.count > 3 %}
+                                <tr class="table-success">
+                                    {% elif res.count > 1 %}
+                                <tr class="table-warning">
+                                    {% else %}
+                                <tr>
+                            {% endif %}
+                        <th scope="row">{{ res.keyword__keyword }}</th>
+                        <td>{{ res.count }}</td>
+                        <td>{{ res.total }}</td>
+                        </tr>
+                        {% endfor %}
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}

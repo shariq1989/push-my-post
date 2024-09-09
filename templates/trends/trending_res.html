@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block content %}
+    <div class="container">
+        {% if recipe_res %}
+            <div class="row">
+                <h1>Trending Now</h1>
+                <h2>Stay up-to-date on the latest recipe trends with our "Trending Now" feature.</h2>
+                <p style="text-align:left;">Discover which recipes are currently popular and get insights into what your
+                    audience is searching for. With our constantly updated data, you'll <b>never miss a trend</b> again.
+                    Use this tool to create <b>new recipe ideas</b>, <b>optimize your content</b> for search engines,
+                    and <b>stay ahead</b> of the competition.</p>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <h2 style="text-align: center;padding-top: .75em;">Recipe Searches</h2>
+                    <table class="table table-striped">
+                        <thead>
+                        <tr>
+                            <th scope="col">Keyword</th>
+                            <th scope="col">Frequency</th>
+                            <th scope="col">Difficulty</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for res in recipe_res %}
+                            {% if res.frequency > 499 %}
+                                <tr class="table-success">
+                                    {% elif res.frequency > 199 %}
+                                <tr class="table-warning">
+                                    {% else %}
+                                <tr>
+                            {% endif %}
+                        <th scope="row">
+                            <a href="{% url 'result_details' res.keyword__keyword %}">
+                                {{ res.keyword__keyword }}
+                            </a>
+                        </th>
+                        <td>{{ res.frequency }}</td>
+                        {% if res.keyword__difficulty < 25 or not res.keyword__difficulty %}
+                            <td>
+                                <span class="badge bg-success">{{ res.keyword__difficulty }}</span>
+                            </td>
+                        {% elif res.keyword__difficulty < 40 %}
+                            <td>
+                                <span class="badge bg-warning text-dark">{{ res.keyword__difficulty }}</span>
+                            </td>
+                        {% else %}
+                            <td>{{ res.keyword__difficulty }}</td>
+                        {% endif %}
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col">
+                    <h2 style="text-align: center;padding-top: .75em;">Recipe Questions Searches</h2>
+                    <table class="table table-striped">
+                        <thead>
+                        <tr>
+                            <th scope="col">Keyword</th>
+                            <th scope="col">Frequency</th>
+                            <th scope="col">Difficulty</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for res in how_res %}
+                            {% if res.frequency > 499 %}
+                                <tr class="table-success">
+                                    {% elif res.frequency > 199 %}
+                                <tr class="table-warning">
+                                    {% else %}
+                                <tr>
+                            {% endif %}
+                        <th scope="row">
+                            <a href="{% url 'result_details' res.keyword__keyword %}">
+                                {{ res.keyword__keyword }}
+                            </a>
+                        </th>
+                        <td>{{ res.frequency }}</td>
+                        {% if res.keyword__difficulty < 25 or not res.keyword__difficulty %}
+                            <td>
+                                <span class="badge bg-success">{{ res.keyword__difficulty }}</span>
+                            </td>
+                        {% elif res.keyword__difficulty < 40 %}
+                            <td>
+                                <span class="badge bg-warning text-dark">{{ res.keyword__difficulty }}</span>
+                            </td>
+                        {% else %}
+                            <td>{{ res.keyword__difficulty }}</td>
+                        {% endif %}
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            </div>
+        {% else %}
+            <div class="container">
+                <div class="row">
+                    <div class="col">
+                        <h1 style="color: maroon">No recipes trended over the last five days.</h1>
+                        <h2 style="color: indianred">Please check again tomorrow.</h2>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    {% if user.is_staff %}
+        <div class="hacker-div">
+            <a href="{{ batch.google_trends_url }}" class="hacker-link">Google Trends Link</a>
+            <p class="hacker-paragraph">Trending Batch ID: {{ batch.d4s_id }}</p>
+            <p class="hacker-paragraph">Date Created: {{ batch.created_on }}</p>
+        </div>
+    {% endif %}
+{% endblock %}

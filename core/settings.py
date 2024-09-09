@@ -35,7 +35,7 @@ if not DEBUG:
         send_default_pii=True
     )
 
-#CSRF_TRUSTED_ORIGINS = env("CSRF_TRUSTED_ORIGINS").split(",")
+# CSRF_TRUSTED_ORIGINS = env("CSRF_TRUSTED_ORIGINS").split(",")
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -55,6 +55,10 @@ INSTALLED_APPS = [
     "crispy_bootstrap5",
     # Local
     "accounts.apps.AccountsConfig",
+    "pages.apps.PagesConfig",
+    "site_scan.apps.SiteScanConfig",
+    "social_publish.apps.SocialPublishConfig",
+    "trends.apps.TrendsConfig"
 ]
 
 # django-crispy-forms
@@ -177,7 +181,7 @@ LOGGING = {
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 AUTH_USER_MODEL = "accounts.CustomUser"
-LOGIN_REDIRECT_URL = "/"
+LOGIN_REDIRECT_URL = "scan/home"
 LOGOUT_REDIRECT_URL = "/"
 SITE_ID = 1
 # https://django-allauth.readthedocs.io/en/latest/configuration.html
@@ -186,3 +190,5 @@ ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_AUTHENTICATION_METHOD = "email"
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_UNIQUE_EMAIL = True
+ACCOUNT_EMAIL_VERIFICATION = "mandatory"
+

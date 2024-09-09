@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Trending food blogging keywords in {{ text_month }} - Recipes They Want{% endblock %}
+
+{% block meta_description %}
+<meta name="description"
+      content="Plan your recipe releases and social media strategy with our Quarterly Trends feature. Get insights into recipe search trends in {{ text_month }} and engage with your audience by creating timely and relevant content.">
+{% endblock %}
+
+{% block keywords %}
+<meta name="keywords"
+      content="recipe trends, quarterly trends, social media strategy, recipe search trends, content planning, {{ text_month }} trends, food blogging trends">
+{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="row">
+            <h1>Quarterly Food Blogging Trends</h1>
+            <h2>Plan your recipe releases and social media strategy.</h2>
+            <p style="text-align:left;">Get a comprehensive view of recipe search trends throughout the year with
+                our quarterly data. Use this tool to decide <b>when to publish</b> or <b>optimize your content</b>
+                and plan your <b>social media strategy</b> accordingly. <b>Stay ahead</b> of the curve and engage
+                with your audience by creating content that's timely and relevant. With our powerful insights,
+                <b>you'll never miss a beat</b>.</p>
+        </div>
+    </div>
+    <div>
+        <ul class="nav nav-pills">
+            <li class="nav-item"><a href="{% url 'display_quarter' 1 %}"
+                                    class="nav-link {% if quarter_num == 1 %}active{% endif %}">Q1 (Jan - Mar)</a>
+            </li>
+            <li class="nav-item"><a href="{% url 'display_quarter' 2 %}"
+                                    class="nav-link {% if quarter_num == 2 %}active{% endif %}">Q2 (Apr - Jun)</a>
+            </li>
+            <li class="nav-item"><a href="{% url 'display_quarter' 3 %}"
+                                    class="nav-link {% if quarter_num == 3 %}active{% endif %}">Q3 (Jul - Sep)</a>
+            </li>
+            <li class="nav-item"><a href="{% url 'display_quarter' 4 %}"
+                                    class="nav-link {% if quarter_num == 4 %}active{% endif %}">Q4 (Oct - Dec)</a>
+            </li>
+        </ul>
+    </div>
+    <div style="padding-top: 1em;">
+        <ul class="nav nav-tabs">
+            {% for list_month, month_num in months_list %}
+            <li class="nav-item">
+                <a class="nav-link {% if list_month == text_month %}active{% endif %}"
+                   href="{% url 'display_quarter' quarter_num month_num %}">{{ list_month }}</a>
+            </li>
+            {% endfor %}
+        </ul>
+        <div style="padding: 1em;"><p style="text-align:left;font-size:16px;"><b>Frequency</b> Indicates how strongly
+            this term is associated with searches in the given month, based on historical recipe search data. Higher
+            frequencies represent terms more commonly searched for in this month.</p></div>
+        <div>
+            {% include 'trends/results_partial.html' %}
+        </div>
+    </div>
+</div>
+{% endblock %}

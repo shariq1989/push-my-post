@@ -1,5 +1,6 @@
 ## Setting Up a New Project
 Run new-project.sh in a directory where you want to create the project folder.
+
 ## Setting Up a New VPS
 - SSH into the VPS
 - Create SSH key

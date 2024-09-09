@@ -1,0 +1,90 @@
+<div class="container">
+    <div class="row">
+        <div class="col">
+            <h2 style="text-align: center; padding-top: .75em;">Recipe Searches</h2>
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th scope="col">Keyword</th>
+                    <th scope="col">Frequency</th>
+                    <th scope="col">Volume</th>
+                    <th scope="col">Difficulty</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for res in recipe_res %}
+                {% if res.count > 3 %}
+                <tr class="table-success">
+                    {% elif res.count > 1 %}
+                <tr class="table-warning">
+                    {% else %}
+                <tr>
+                    {% endif %}
+                    <th scope="row">
+                        <a href="{% url 'result_details' res.keyword__keyword %}">
+                            {{ res.keyword__keyword }}
+                        </a>
+                    </th>
+                    <td>{{ res.count }}</td>
+                    <td>{{ res.keyword__volume }}</td>
+                    {% if res.keyword__difficulty < 25 or not res.keyword__difficulty %}
+                    <td>
+                        <span class="badge bg-success">{{ res.keyword__difficulty }}</span>
+                    </td>
+                    {% elif res.keyword__difficulty < 40 %}
+                    <td>
+                        <span class="badge bg-warning text-dark">{{ res.keyword__difficulty }}</span>
+                    </td>
+                    {% else %}
+                    <td>{{ res.keyword__difficulty }}</td>
+                    {% endif %}
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="col">
+            <h2 style="text-align: center;padding-top: .75em;">Recipe Questions Searches</h2>
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th scope="col">Keyword</th>
+                    <th scope="col">Frequency</th>
+                    <th scope="col">Volume</th>
+                    <th scope="col">Difficulty</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for res in how_res %}
+                {% if res.count > 3 %}
+                <tr class="table-success">
+                    {% elif res.count > 1 %}
+                <tr class="table-warning">
+                    {% else %}
+                <tr>
+                    {% endif %}
+                    <th scope="row">
+                        <a href="{% url 'result_details' res.keyword__keyword %}">
+                            {{ res.keyword__keyword }}
+                        </a>
+                    </th>
+                    <td>{{ res.count }}</td>
+                    <td>{{ res.keyword__volume }}</td>
+                    {% if res.keyword__difficulty < 25 or not res.keyword__difficulty %}
+                    <td>
+                        <span class="badge bg-success">{{ res.keyword__difficulty }}</span>
+                    </td>
+                    {% elif res.keyword__difficulty < 40 %}
+                    <td>
+                        <span class="badge bg-warning text-dark">{{ res.keyword__difficulty }}</span>
+                    </td>
+                    {% else %}
+                    <td>{{ res.keyword__difficulty }}</td>
+                    {% endif %}
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

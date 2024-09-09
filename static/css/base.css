@@ -1,0 +1,29 @@
+:root {
+  --primary: #E60023;
+  --secondary: #0073b1;
+  --accent: #26a69a;
+  --light: #f8f9fa;
+  --dark: #2c3e50;
+  --mellow: #f0f4f8;
+}
+
+.bg-primary { background-color: var(--primary) !important; }
+.bg-secondary { background-color: var(--secondary) !important; }
+.bg-accent { background-color: var(--accent) !important; }
+.bg-light { background-color: var(--light) !important; }
+.bg-dark { background-color: var(--dark) !important; }
+
+.text-primary { color: var(--primary) !important; }
+.text-secondary { color: var(--secondary) !important; }
+.text-accent { color: var(--accent) !important; }
+.text-light { color: var(--light) !important; }
+.text-dark { color: var(--dark) !important; }
+
+.btn-primary { background-color: var(--primary); border-color: var(--primary); }
+.btn-primary:hover { background-color: #d50020; border-color: #d50020; }
+.btn-secondary { background-color: var(--secondary); border-color: var(--secondary); }
+.btn-accent { background-color: var(--accent); border-color: var(--accent); }
+
+.bg-mellow { background-color: var(--mellow); }
+a { color: var(--secondary); }
+a:hover { color: #005d8e; }

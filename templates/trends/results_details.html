@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% block title %}Search Trend Data for {{ keyword }} | Trend Analysis{% endblock %}
+{% block meta_description %}
+    <meta name="description"
+          content="Explore the search trend data for {{ keyword }} and analyze Google search interest over the last three years. Plan your recipe release strategy based on the trends and discover similar trending keywords.">
+{% endblock %}
+{% block keywords %}
+    <meta name="keywords"
+          content="search trend data, {{ keyword }}, Google search interest, recipe release strategy, trending
+    keywords, trend analysis">
+{% endblock %}
+{% block content %}
+    <div class="container">
+        <h1>Search trend data for <b>{{ keyword }}</b></h1>
+        <div class="row">
+            <div class="col-md-4">
+                <h2>When do searches for {{ keyword }} trend?</h2>
+                <p class="sub-header">The graph shows Google search interest over the last three years for
+                    <b>{{ keyword }}</b>. You can use this graph to plan when you will release or republish
+                    this recipe.
+                </p>
+            </div>
+            <div class="col-md-8">
+                {% if labels %}
+                    <div>
+                        <canvas id="myChart"></canvas>
+                    </div>
+                    <script>
+                        const data = {
+                            labels: {{ labels|safe }},
+                            datasets: [{
+                                label: 'Search Score',
+                                backgroundColor: '#8662C7',
+                                borderColor: '#8662C7',
+                                data: {{ data|safe }},
+                            }]
+                        };
+
+                        const config = {
+                            type: 'line',
+                            data: data,
+                            options: {}
+                        };
+                    </script>
+                    <script>
+                        const myChart = new Chart(
+                            document.getElementById('myChart'),
+                            config
+                        );
+                    </script>
+                {% endif %}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <h2>Similar Searches for {{ keyword }}</h2>
+                <p class="sub-header">These are the trending and all-time most searched keywords similar to
+                    <b>{{ keyword }}</b></p>
+            </div>
+            <div class="col-md-8">
+                <div class="row">
+                    <div class="col">
+                        <h3 style="text-align: center; padding-top: .75em;">Trending Similar Searches</h3>
+                        {% if rising_res %}
+                            <table class="table table-striped">
+                                <thead>
+                                <tr>
+                                    <th scope="col">Keyword</th>
+                                    <th scope="col">Score</th>
+                                    <th scope="col">Difficulty</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for res in rising_res %}
+                                    {% if res.frequency > 499 %}
+                                        <tr class="table-success">
+                                            {% elif res.frequency > 149 %}
+                                        <tr class="table-warning">
+                                            {% else %}
+                                        <tr>
+                                    {% endif %}
+                                <th scope="row">
+                                    {{ res.related_keyword__keyword }}
+                                </th>
+                                <td>{{ res.frequency }}</td>
+                                {% if res.related_keyword__difficulty < 25 or not res.related_keyword__difficulty %}
+                                    <td>
+                                        <span class="badge bg-success">{{ res.related_keyword__difficulty }}</span>
+                                    </td>
+                                {% elif res.related_keyword__difficulty < 40 %}
+                                    <td>
+                                        <span class="badge bg-warning text-dark">{{ res.related_keyword__difficulty }}</span>
+                                    </td>
+                                {% else %}
+                                    <td>{{ res.related_keyword__difficulty }}</td>
+                                {% endif %}
+                                </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        {% else %}
+                            <div class="alert alert-secondary" role="alert">
+                                No trending similar keywords found
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="col">
+                        <h3 style="text-align: center;padding-top: .75em;">Top All Time Similar Searches</h3>
+                        {% if top_res %}
+                            <table class="table table-striped">
+                                <thead>
+                                <tr>
+                                    <th scope="col">Keyword</th>
+                                    <th scope="col">Score</th>
+                                    <th scope="col">Difficulty</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for res in top_res %}
+                                    {% if res.frequency > 74 %}
+                                        <tr class="table-success">
+                                            {% elif res.frequency > 49 %}
+                                        <tr class="table-warning">
+                                            {% else %}
+                                        <tr>
+                                    {% endif %}
+                                <th scope="row">
+                                    {{ res.related_keyword__keyword }}
+                                </th>
+                                <td>{{ res.frequency }}</td>
+                                <td>{{ res.related_keyword__difficulty }}</td>
+                                </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        {% else %}
+                            <div class="alert alert-secondary" role="alert">
+                                No top similar keywords found
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

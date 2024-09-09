@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+    <div class="row">
+        <h1>Social Publishing</h1>
+        <h4 class="sub-header">Select posts to promote to social media here.</h4>
+    </div>
+    <form method="GET" action="{% url 'search' site_id=site_id %}">
+        <div class="row">
+            <div class="col-md-5">
+                <div class="form-group">
+                    <input type="text" name="query" required class="form-control"
+                           placeholder="Search by title or description">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-primary btn-block">Search</button>
+            </div>
+        </div>
+        <div class="mt-3">
+            <div class="form-check form-check-inline">
+                <input type="radio" name="search_option" id="search_title" value="title">
+                <label for="search_title" class="radio-label">Search Titles</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input type="radio" name="search_option" id="search_description" value="description">
+                <label for="search_description" class="radio-label">Search Descriptions</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input type="radio" name="search_option" id="search_both" value="both" checked>
+                <label for="search_both" class="radio-label">Search Both</label>
+            </div>
+        </div>
+    </form>
+    <form method="POST" action="{% url 'scan_submit' %}">
+        {% csrf_token %}
+        <div class="container mt-5">
+            <div class="row">
+                <div class="col-md-6">
+                    <h3 class="mb-4">{{ site.name }}</h3>
+                </div>
+                <div class="col-md-3">
+                    <h4 style="color:gray;">{{ blog_posts_count }} posts</h4>
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-primary btn-lg btn-block" name="scan_submit_btn">Submit
+                    </button>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4"></div>
+                <div class="col-md-4">
+                    <div class="btn-group" role="group">
+                        <a href="{% url 'site_blog_posts' site_id=site_id %}" class="btn btn-primary active">All
+                            Posts</a>
+                        <a href="{% url 'get_site_trending_posts' site_id=site_id %}" class="btn btn-primary">Trending
+                            Posts</a>
+                        <a href="{% url 'get_site_recent_posts' site_id=site_id %}" class="btn btn-primary">Recent
+                            Posts</a>
+                    </div>
+                </div>
+                <div class="col-md-4"></div>
+            </div>
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>
+                        <input type="checkbox" id="selectAll" class="form-check-input">
+                        <label for="selectAll">Select All</label>
+                    </th>
+                    <th>Title</th>
+                    <th>Description</th>
+                    <th>URL</th>
+                    <th>Featured Image URL</th>
+                    <th>Date Modified</th>
+                    <!-- Add more column headings if needed -->
+                </tr>
+                </thead>
+                <tbody>
+                {% for blog_post in blog_posts %}
+                <tr>
+                    <td><label for="{{ page.url }}_id"></label><input class="form-check-input"
+                                                                      name="selected_pages" type="checkbox"
+                                                                      value="{{ blog_post.id }}"></td>
+                    <td>{{ blog_post.title }}</td>
+                    <td>{{ blog_post.description }}</td>
+                    <td><a href="{{ blog_post.url }}" target="_blank">{{ blog_post.url }}</a></td>
+                    <td>
+                        <img class="scan-feat-img" src="{{ blog_post.featured_image_url }}"
+                             alt="Featured Image">
+                    </td>
+                    <td>{{ blog_post.date_modified }}</td>
+                    <!-- Add more table cells for other columns -->
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </form>
+</div>
+{% endblock %}
+{% block javascript %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var selectAllCheckbox = document.getElementById('selectAll');
+    var checkboxes = document.querySelectorAll('input[type="checkbox"][name="selected_pages"]');
+
+    selectAllCheckbox.addEventListener('change', function(e) {
+        for (var i = 0; i < checkboxes.length; i++) {
+            checkboxes[i].checked = selectAllCheckbox.checked;
+        }
+    });
+});
+</script>
+{% endblock %}

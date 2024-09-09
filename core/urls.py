@@ -15,14 +15,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.http import HttpResponse
-from django.urls import path
-
-
-def home(request):
-    return HttpResponse("Welcome to the Django Starter Project")
-
+from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', home, name='home'),
+    path("accounts/", include("allauth.urls")),
+    # Local apps
+    path("", include("pages.urls")),
+    path("scan", include("site_scan.urls"))
 ]

@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block content %}
+    <div class="container">
+        <div class="row">
+
+            <div class="col-md-6">
+                <div class="container border border-primary" style="margin-top: 2em">
+                    <div class="row" style="padding: 1em">
+                        <form class="row" action="{% url 'trends' %}" method="post">
+                            {% csrf_token %}
+                            <fieldset>
+                                <h3>Select a month</h3>
+
+                                <div>
+                                    <input type="radio" id="01" name="month" value="01"
+                                            {% if this_month == 01 %} checked{% endif %}>
+                                    <label for="01">January</label>
+                                </div>
+                                <div>
+                                    <input type="radio" id="02" name="month" value="02"
+                                            {% if this_month == 02 %} checked{% endif %}>
+                                    <label for="02">February</label>
+                                </div>
+
+                                <div>
+                                    <input type="radio" id="03" name="month" value="03"
+                                            {% if this_month == 03 %} checked{% endif %}>
+                                    <label for="03">March</label>
+                                </div>
+                                <div>
+                                    <input type="radio" id="04" name="month" value="04"
+                                            {% if this_month == 04 %} checked{% endif %}>
+                                    <label for="04">April</label>
+                                </div>
+                                <div>
+                                    <input type="radio" id="05" name="month" value="05" {% if this_month == 05 %}
+                                           checked{% endif %}>
+
+                                    <label for="05">May</label>
+                                </div>
+                                <div>
+                                    <input type="radio" id="06" name="month" value="06"
+                                            {% if this_month == 06 %} checked{% endif %}>
+                                    <label for="06">June</label>
+                                </div>
+                                <div>
+                                    <input type="radio" id="07" name="month" value="07"
+                                            {% if this_month == 07 %} checked{% endif %}>
+                                    <label for="07">July</label>
+                                </div>
+                                <div>
+                                    <input type="radio" id="08" name="month" value="08"
+                                            {% if this_month == 08 %} checked{% endif %}>
+                                    <label for="08">August</label>
+                                </div>
+                                <div>
+                                    <input type="radio" id="09" name="month" value="09"
+                                            {% if this_month == 09 %} checked{% endif %}>
+                                    <label for="09">September</label>
+                                </div>
+                                <div>
+                                    <input type="radio" id="10" name="month" value="10"
+                                            {% if this_month == 10 %} checked{% endif %}>
+                                    <label for="10">October</label>
+                                </div>
+                                <div>
+                                    <input type="radio" id="11" name="month" value="11"
+                                            {% if this_month == 11 %} checked{% endif %}>
+                                    <label for="11">November</label>
+                                </div>
+                                <div>
+                                    <input type="radio" id="12" name="month" value="12"
+                                            {% if this_month == 12 %} checked{% endif %}>
+                                    <label for="12">December</label>
+                                </div>
+                            </fieldset>
+                            <div class="col-12" style="padding-top: 1em;">
+                                <button type="submit" class="btn btn-primary" name="login_btn">Submit</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

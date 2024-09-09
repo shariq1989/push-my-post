@@ -1,0 +1,68 @@
+{
+  'version': '0.1.20221214',
+  'status_code': 20000,
+  'status_message': 'Ok.',
+  'time': '5.1080 sec.',
+  'cost': 0.002,
+  'tasks_count': 3,
+  'tasks_error': 2,
+  'tasks': [
+    {
+      'id': '04140059-4355-0121-0000-cbce5a485b82',
+      'status_code': 20000,
+      'status_message': 'Ok.',
+      'time': '5.0451 sec.',
+      'cost': 0.002,
+      'result_count': 1,
+      'path': [
+        'v3',
+        'serp',
+        'google',
+        'organic',
+        'live',
+        'regular'
+      ],
+      'data': {
+        'api': 'serp',
+        'function': 'live',
+        'se': 'google',
+        'se_type': 'organic',
+        'keyword': 'how long to cook a steak for medium rare',
+        'location_name': 'United States',
+        'language_name': 'English',
+        'device': 'desktop',
+        'os': 'windows'
+      },
+      'result': [
+        {
+          'keyword': 'how long to cook a steak for medium rare',
+          'type': 'organic',
+          'se_domain': 'google.com',
+          'location_code': 2840,
+          'language_code': 'en',
+          'check_url': 'https://www.google.com/search?q=how%20long%20to%20cook%20a%20steak%20for%20medium%20rare&num=100&hl=en&gl=US&gws_rd=cr&ie=UTF-8&oe=UTF-8&uule=w+CAIQIFISCQs2MuSEtepUEUK33kOSuTsc',
+          'datetime': '2023-04-13 21:59:21 +00:00',
+          'spell': None,
+          'item_types': [
+            'organic',
+            'recipes',
+            'related_searches'
+          ],
+          'se_results_count': 10500000,
+          'items_count': 97,
+          'items': [{
+              'type': 'organic',
+              'rank_group': 1,
+              'rank_absolute': 1,
+              'domain': 'www.onceuponachef.com',
+              'title': 'How To Cook Steak On The Stovetop',
+              'description': '(For medium, cook 4 to 5 minutes on second side; for well-done, cook 5 to 6 minutes on second side). During the last minute of cooking, add the butter and thyme\xa0...',
+              'url': 'https://www.onceuponachef.com/recipes/how-to-cook-steak-on-the-stovetop.html',
+              'breadcrumb': 'https://www.onceuponachef.com › Recipes › Dinner'
+            }
+          ],
+        }
+      ]
+    },
+  ]
+}

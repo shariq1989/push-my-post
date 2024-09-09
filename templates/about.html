@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<div class="container">
+    <h1>About Me</h1>
+    <div class="row">
+        <div class="col-md-4">
+            <img src="{% static 'images/me.jpg' %}" alt="Picture of me" style="height: 500px">
+        </div>
+
+        <div class="col-md-8">
+            <h2>Hi there! I'm Shariq,</h2>
+            <p>With over a decade of combined experience in software engineering and a fervent commitment to helping
+                food bloggers thrive, I'm on a mission to empower your journey.</p>
+
+            <p>Equipped with a BS in Computer Science and an MS in Information Management Systems, I've dedicated
+                over eight years to software engineering. My specialty? Crafting personalized tools that tackle
+                real-world challenges, specifically designed to support my wife's food blogging venture.</p>
+
+            <p>As someone who has stepped into the world of food blogging alongside my wife, I've personally
+                experienced the technical hurdles that can hinder growth. From the intricacies of recipe development
+                and photography to website design, SEO, monetization, and analytics - mastering it all is no small
+                feat. We achieved 50k monthly sessions on our <a href="https://jamilghar.com" target="_blank"
+                                                                 rel="noopener">food blog</a> in under two years.</p>
+
+            <p>That's why I bring together my software engineering prowess to offer tailored solutions exclusively
+                for food bloggers. My goal is to lighten the technical load so that you can concentrate on what
+                truly matters - crafting enticing recipes and engaging content that resonates with your readers.</p>
+
+            <p>As a solo developer and an adjunct professor, I take pride in delivering white-glove service and
+                mentorship to support the journey of food bloggers. My mission is to alleviate the technical
+                burdens, whether you're a seasoned blogger or just starting out.</p>
+
+            <p>I'm here to help you navigate the world of food blogging, whether you're an experienced blogger or
+                just starting out. I don't just develop tools; I offer personalized coaching and consultations.
+                Together, we'll identify the best strategies to amplify your impact and income.</p>
+
+            <p>My decade in web development, combined with my journey in food blogging, equips me with insider
+                knowledge of what works in the here and now, not last year. I stay at the forefront of the latest
+                trends and technology to provide up-to-the-minute guidance.</p>
+
+            <p>Ready to unlock your blog's untapped potential? Sign up for a
+                <b><a href="{% url 'blog_audit' %}">Food Blog Audit</a></b>!</p>
+
+            <p>The possibilities are boundless when you have the right technical partner in your corner. Let's
+                elevate your food blogging journey.</p>
+
+            <div class="contact-me">
+                <h2>Contact Me</h2>
+                <p>Feel free to get in touch via social media:</p>
+                <p>
+                    <a href="https://twitter.com/code_musings">Twitter</a> |
+                    <a href="https://instagram.com/shariq1989">Instagram</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

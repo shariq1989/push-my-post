@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h1 class="h4 mb-4 text-center">Confirm Your Email</h1>
+                    <p class="text-center">Please click the link in the email we sent you to confirm your email address.</p>
+                    <p class="text-center"><a href="{% url 'account_resend_confirmation' %}" class="btn btn-primary">Resend Confirmation Email</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
