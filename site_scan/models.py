@@ -7,7 +7,7 @@ class Site(models.Model):
     name = models.CharField(max_length=255, null=True)
     url = models.URLField()
     created_on = models.DateField(auto_now_add=True)
-    last_scan = models.DateTimeField()
+    last_scan = models.DateTimeField(null=True)
 
     def __str__(self):
         return f"{self.name}"

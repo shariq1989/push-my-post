@@ -4,7 +4,8 @@ from django.db.models import Q
 # from PIL import Image, ImageFont, ImageDraw
 # import praw
 from environs import Env
-from .service import sanitize_url, parse_sitemap, fetch_sites, fetch_trending_posts, find_trending_blog_posts
+from .service import sanitize_url, parse_sitemap, fetch_sites, fetch_trending_posts, find_trending_blog_posts, \
+    save_site
 from social_publish.service import pinterest_login, get_pinterest_user_data
 import sys
 from .models import Site, BlogPost
@@ -142,7 +143,7 @@ def submit_site(request):
     # TODO: Handle all sitemaps
     # TODO: Handle YOAST sitemap
     try:
-        posts = parse_sitemap(site, request, True)
+        save_site(site, request)
     except ValueError as error:
         print('Error processing URL')
         print(error)

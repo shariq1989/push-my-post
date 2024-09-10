@@ -59,9 +59,12 @@ def extract_featured_image_url(soup):
         return None
 
 
-def save_site_info(site_name, site_url, user):
+def save_site_info(site_name, site_url, user, new_site=False):
     current_datetime = timezone.now()
-    defaults = {'name': site_name, 'last_scan': current_datetime, 'user': user}
+    if new_site:
+        defaults = {'name': site_name, 'last_scan': None, 'user': user}
+    else:
+        defaults = {'name': site_name, 'last_scan': current_datetime, 'user': user}
     site, created = Site.objects.update_or_create(url=site_url, defaults=defaults)
     return site
 
@@ -157,6 +160,22 @@ def parse_individual_sitemap(site, sitemap_xml):
                     logger.info(f"Parsing progress: {index + 1} posts parsed")
 
     return posts
+
+
+def save_site(site_url, request):
+    headers = {'User-Agent': 'Mozilla/5.0'}
+    # For setting site title
+    logger.info(f"Fetching site home page for {site_url}")
+    site_home_page_content = fetch_page_content(site_url)
+    if not site_home_page_content:
+        logger.error('Failed to fetch site home page')
+        return []
+    site_home_soup = BeautifulSoup(site_home_page_content, 'html.parser')
+    site_name = extract_site_name(site_home_soup)
+    logger.info(f"Site name extracted: {site_name}")
+
+    site = save_site_info(site_name, site_url, request.user, True)  # Save site information
+    logger.info(f"Site information saved: {site}")
 
 
 def parse_sitemap(site_url, request, stop=False):
