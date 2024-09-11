@@ -2,7 +2,7 @@
 
 echo "Entering recipe_research dir"
 # Navigate to your project directory
-cd ~/Development/recipe_research/
+cd /root/development/push-my-post/
 
 echo "Pulling updates from repo"
 # Pull the latest changes from the Git repository
@@ -25,4 +25,4 @@ sudo docker-compose exec web python manage.py collectstatic --noinput
 
 echo "Tailing application log"
 # Tail log
-sudo docker logs --follow recipe_research_web_1
+sudo docker logs --follow push-my-post-web-1
