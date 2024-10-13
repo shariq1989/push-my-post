@@ -35,7 +35,7 @@ if not DEBUG:
         send_default_pii=True
     )
 
-CSRF_TRUSTED_ORIGINS = env("CSRF_TRUSTED_ORIGINS").split(",")
+    CSRF_TRUSTED_ORIGINS = env("CSRF_TRUSTED_ORIGINS").split(",")
 
 INSTALLED_APPS = [
     'django.contrib.admin',
