@@ -178,43 +178,62 @@ def save_site(site_url, request):
     logger.info(f"Site information saved: {site}")
 
 
-def parse_sitemap(site_url, request, stop=False):
+def parse_sitemap(stop=False):
     headers = {'User-Agent': 'Mozilla/5.0'}
-    # For setting site title
-    logger.info(f"Fetching site home page for {site_url}")
-    site_home_page_content = fetch_page_content(site_url)
-    if not site_home_page_content:
-        logger.error('Failed to fetch site home page')
-        return []
-    site_home_soup = BeautifulSoup(site_home_page_content, 'html.parser')
-    site_name = extract_site_name(site_home_soup)
-    logger.info(f"Site name extracted: {site_name}")
 
-    site = save_site_info(site_name, site_url, request.user)  # Save site information
-    logger.info(f"Site information saved: {site}")
+    # Fetch all sites from the database
+    sites = Site.objects.all()
 
-    sitemap_index_xml = fetch_sitemap_index(site_url, headers)
-    if sitemap_index_xml is None:
-        logger.error('No sitemap found')
-        return []
+    for site in sites:
+        site_url = site.url
 
-    sitemap_urls = sitemap_index_xml.find_all('loc')
-    all_posts = []
-    for index, sitemap_url_element in enumerate(sitemap_urls):
-        sitemap_url = sitemap_url_element.get_text(strip=True)
-        if "post-sitemap" in sitemap_url:
-            logger.info(f"Fetching and parsing individual sitemap: {sitemap_url}")
-            sitemap_xml = fetch_and_parse_sitemap(sitemap_url, headers)
-            posts = parse_individual_sitemap(site, sitemap_xml)
-            all_posts.extend(posts)
-            if stop and len(all_posts) >= 5:
-                logger.info("Parsing stopped due to 'stop' flag")
-                break
-            if (index + 1) % 25 == 0:
-                logger.info(f"Parsing progress: {index + 1} sitemaps parsed")
-    logger.info(f"Total posts parsed: {len(all_posts)}")
+        # Fetching the site home page content
+        logger.info(f"Fetching site home page for {site_url}")
+        site_home_page_content = fetch_page_content(site_url)
+        if not site_home_page_content:
+            logger.error(f'Failed to fetch home page for {site_url}')
+            continue
 
-    return all_posts
+        # Parsing the home page to extract the site name
+        site_home_soup = BeautifulSoup(site_home_page_content, 'html.parser')
+        site_name = extract_site_name(site_home_soup)
+        logger.info(f"Site name extracted: {site_name}")
+
+        # Update the site name and last scan time
+        site.name = site_name  # Update the name if necessary
+        site.last_scan = timezone.now()  # Update the last scan timestamp
+        site.save()
+        logger.info(f"Site information updated: {site}")
+
+        # Fetch the sitemap index
+        sitemap_index_xml = fetch_sitemap_index(site_url, headers)
+        if sitemap_index_xml is None:
+            logger.error(f'No sitemap found for {site_url}')
+            continue
+
+        # Process the sitemap URLs
+        sitemap_urls = sitemap_index_xml.find_all('loc')
+        all_posts = []
+        for index, sitemap_url_element in enumerate(sitemap_urls):
+            sitemap_url = sitemap_url_element.get_text(strip=True)
+            if "post-sitemap" in sitemap_url:
+                logger.info(f"Fetching and parsing individual sitemap: {sitemap_url}")
+                sitemap_xml = fetch_and_parse_sitemap(sitemap_url, headers)
+                posts = parse_individual_sitemap(site, sitemap_xml)
+                all_posts.extend(posts)
+
+                # Stop parsing if the limit is reached and the stop flag is set
+                if stop and len(all_posts) >= 5:
+                    logger.info(f"Parsing stopped due to 'stop' flag for {site_url}")
+                    break
+
+                # Log progress every 25 sitemaps
+                if (index + 1) % 25 == 0:
+                    logger.info(f"Parsing progress: {index + 1} sitemaps parsed for {site_url}")
+
+        logger.info(f"Total posts parsed for {site_url}: {len(all_posts)}")
+
+    logger.info("Sitemap parsing completed for all sites.")
 
 
 def fetch_sites(user):

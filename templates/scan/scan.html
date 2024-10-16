@@ -101,15 +101,15 @@
 {% endblock %}
 {% block javascript %}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    var selectAllCheckbox = document.getElementById('selectAll');
-    var checkboxes = document.querySelectorAll('input[type="checkbox"][name="selected_pages"]');
+    document.addEventListener('DOMContentLoaded', function() {
+        var selectAllCheckbox = document.getElementById('selectAll');
+        var checkboxes = document.querySelectorAll('input[type="checkbox"][name="selected_pages"]');
 
-    selectAllCheckbox.addEventListener('change', function(e) {
-        for (var i = 0; i < checkboxes.length; i++) {
-            checkboxes[i].checked = selectAllCheckbox.checked;
-        }
+        selectAllCheckbox.addEventListener('change', function(e) {
+            for (var i = 0; i < checkboxes.length; i++) {
+                checkboxes[i].checked = selectAllCheckbox.checked;
+            }
+        });
     });
-});
 </script>
 {% endblock %}

@@ -8,10 +8,10 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         # Get all BlogPosts where the associated Site's URL contains "jamilghar"
-        blogposts_to_delete = BlogPost.objects.filter(site__url__icontains='jamilghar')
+        blogposts_to_delete = BlogPost.objects.all()
 
         # Delete the selected BlogPosts
         blogposts_to_delete.delete()
 
         self.stdout.write(self.style.SUCCESS('Successfully deleted posts with Site URL containing "jamilghar"'))
-        posts = parse_sitemap('https://jamilghar.com', False)
+        posts = parse_sitemap(False)
