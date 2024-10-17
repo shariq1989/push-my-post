@@ -31,7 +31,7 @@ rate_limit_reset_time = 0
 # https://developers.pinterest.com/docs/getting-started/authentication/#2.%20Receive%20the%20access%20code%20with%20your%20redirect%20URI
 def pinterest_login():
     client_id = PINTEREST_APP_ID
-    redirect_uri = 'https://pushmypost.com/social/pinterest-auth'
+    redirect_uri = 'https://pushmypost.com/social_publish/pinterest-auth'
     scope = 'boards:read,boards:write,pins:read,pins:write'
     state = 'rtw-pinner'
     pinterest_oauth_url = f'https://www.pinterest.com/oauth/?' \
@@ -48,7 +48,7 @@ def pinterest_login():
 def get_pinterest_access_token(code, state):
     # Define the endpoint URL
     token_url = 'https://api.pinterest.com/v5/oauth/token'
-    redirect_uri = 'https://pushmypost.com/social/pinterest-access_token'
+    redirect_uri = 'https://pushmypost.com/social_publish/pinterest-access_token'
     # Prepare the authorization header using client_id and client_secret
     auth_header = f'{PINTEREST_APP_ID}:{PINTEREST_SECRET_KEY}'
     encoded_auth_header = base64.b64encode(auth_header.encode()).decode()
