@@ -62,7 +62,7 @@ def scan_submit(request):
         'posts': selected_posts,
         'boards': boards
     }
-    return render(request, 'social_publish/pin_publish.html', context)
+    return render(request, 'social/pin_publish.html', context)
 
 
 def search_submit(request, site_id):

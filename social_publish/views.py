@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 def home(request):
     if request.user.is_staff:
         context = {}
-        return render(request, "social_publish/publish.html", context)
+        return render(request, "social/publish.html", context)
     else:
         return render(request, "home.html")
 
