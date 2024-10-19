@@ -118,13 +118,22 @@ def create_tweet(tweet_data):
     return response.json()
 
 
-def request_pinterest(endpoint,
-                      call_type='get',
-                      data=None,
-                      category='org_write',
-                      access_token=None,
-                      query_params=None):
+def request_pinterest(
+        endpoint: str,
+        category: str = 'org_write',
+        call_type: str = 'get',
+        data: Optional[Dict[str, Any]] = None,
+        access_token: Optional[str] = None,
+        query_params: Optional[str] = None
+) -> Optional[Dict[str, Any]]:
     global rate_limits
+
+    # Type checking
+    if not isinstance(category, str):
+        raise TypeError(f"'category' must be a string, not {type(category)}")
+
+    if category not in rate_limits:
+        raise ValueError(f"Unknown category: {category}. Valid categories are: {', '.join(rate_limits.keys())}")
 
     if access_token is None:
         logger.error("No Pinterest access token passed.")
@@ -153,6 +162,9 @@ def request_pinterest(endpoint,
             response = requests.get(url, headers=headers)
         elif call_type == 'post':
             response = requests.post(url, headers=headers, json=data)
+        else:
+            raise ValueError(f"Unsupported call_type: {call_type}. Use 'get' or 'post'.")
+
         response.raise_for_status()
 
         # Update rate limit info
