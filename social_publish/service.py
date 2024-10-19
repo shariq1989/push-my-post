@@ -2,6 +2,7 @@ import logging
 import requests
 import base64
 import time
+from typing import Dict, Any, Optional
 from requests.exceptions import HTTPError
 from django.utils import timezone
 from environs import Env
@@ -22,9 +23,12 @@ TWITTER_BEARER_TOKEN = env("TWITTER_BEARER_TOKEN")
 TWITTER_ACCESS_TOKEN = env("TWITTER_ACCESS_TOKEN")
 TWITTER_ACCESS_TOKEN_SECRET = env("TWITTER_ACCESS_TOKEN_SECRET")
 
-# Global variables to track rate limit status
-rate_limit_remaining = float('inf')
-rate_limit_reset_time = 0
+# Global variables for rate limiting
+rate_limits = {
+    "org_write": {"calls_per_min": 100, "remaining": 100, "reset_time": 0},
+    "org_read": {"calls_per_min": 1000, "remaining": 1000, "reset_time": 0},
+    # Add other categories as needed
+}
 
 
 # Receive the access code with your redirect URI
@@ -114,33 +118,34 @@ def create_tweet(tweet_data):
     return response.json()
 
 
-def request_pinterest(endpoint, call_type='get', data=None, access_token=None, query_params=None):
-    global rate_limit_remaining
-    global rate_limit_reset_time
+def request_pinterest(endpoint,
+                      call_type='get',
+                      data=None,
+                      category='org_write',
+                      access_token=None,
+                      query_params=None):
+    global rate_limits
 
     if access_token is None:
-        logger.error(f"No Pinterest access token passed.")
+        logger.error("No Pinterest access token passed.")
         print(f'Pinterest request. Endpoint: {endpoint}, call: {call_type}, data: {data}')
         return None
 
-    # url = 'https://api-sandbox.pinterest.com/v5/' + endpoint
-    url = 'https://api.pinterest.com/v5/' + endpoint
-    if query_params is not None:
+    url = f'https://api.pinterest.com/v5/{endpoint}'
+    if query_params:
         url += query_params
 
     headers = {
-        'Authorization': 'Bearer ' + access_token,
+        'Authorization': f'Bearer {access_token}',
         'Content-Type': 'application/json'
     }
-    response = None
 
-    # Check if rate limit is about to be exceeded
-    if rate_limit_remaining <= 1:
-        # Calculate how long to wait until rate limit resets
-        current_time = time.time()
-        wait_time = rate_limit_reset_time - current_time
+    # Check rate limits
+    current_time = time.time()
+    if rate_limits[category]["remaining"] <= 1 and current_time < rate_limits[category]["reset_time"]:
+        wait_time = max(rate_limits[category]["reset_time"] - current_time, 0)
         if wait_time > 0:
-            print(f"Rate limit reached. Waiting for {wait_time} seconds.")
+            print(f"Rate limit reached for {category}. Waiting for {wait_time} seconds.")
             time.sleep(wait_time)
 
     try:
@@ -150,30 +155,30 @@ def request_pinterest(endpoint, call_type='get', data=None, access_token=None, q
             response = requests.post(url, headers=headers, json=data)
         response.raise_for_status()
 
-        # Read rate limit headers
-        rate_limit_remaining = int(response.headers.get('X-RateLimit-Remaining', rate_limit_remaining))
-        rate_limit_reset_time = int(response.headers.get('X-RateLimit-Reset', rate_limit_reset_time))
+        # Update rate limit info
+        rate_limits[category]["remaining"] = int(
+            response.headers.get('X-RateLimit-Remaining', rate_limits[category]["remaining"]))
+        rate_limits[category]["reset_time"] = int(
+            response.headers.get('X-RateLimit-Reset', rate_limits[category]["reset_time"]))
 
         resp_json = response.json()
         if response.status_code not in {200, 201}:
-            # If the status code is not 200 or 201, handle the error
-            error_message = response.json()
+            error_message = resp_json
             logger.error(f"Pinterest API error ({response.status_code}): {error_message}")
             raise Exception(
-                f"Error making Pinterest API request  Endpoint: {endpoint}, call: {call_type}, headers: {headers}, data: {data}")
+                f"Error making Pinterest API request. Endpoint: {endpoint}, call: {call_type}, headers: {headers}, data: {data}")
+
     except requests.exceptions.RequestException as e:
         if response.status_code == 429:
-            # If rate limit exceeded, log and retry after the specified delay
             retry_after = int(response.headers.get('Retry-After', 1))
-            print(f"Rate limit exceeded. Retrying after {retry_after} seconds.")
+            print(f"Rate limit exceeded for {category}. Retrying after {retry_after} seconds.")
             time.sleep(retry_after)
-            return request_pinterest(endpoint, call_type, data, access_token, query_params)
+            return request_pinterest(endpoint, category, call_type, data, access_token, query_params)
         else:
             logger.error(f"Error making Pinterest call: {e}")
             print(f'Pinterest request. Endpoint: {endpoint}, call: {call_type}, headers:{headers} data: {data}')
-            raise Exception("Error fetching boards") from e
+            raise Exception("Error fetching data from Pinterest") from e
 
-    # Process the data here
     print(f'Pinterest Response: {resp_json}')
     return resp_json
 
@@ -251,14 +256,15 @@ def create_pinterest_pin(post_id, input_data, pin_user):
 
 
 def get_boards(pin_user):
-    resp = request_pinterest('boards', access_token=pin_user.access_token)
+    resp = request_pinterest('boards', category='org_read', access_token=pin_user.access_token)
     pin_boards = []
     if resp['items'] is not None:
         pin_boards.extend(resp['items'])
     bookmark = resp['bookmark']
     while bookmark is not None:
         query_param = '?bookmark=' + resp['bookmark']
-        resp = request_pinterest('boards', access_token=pin_user.access_token, query_params=query_param)
+        resp = request_pinterest('boards', category='org_read', access_token=pin_user.access_token,
+                                 query_params=query_param)
         pin_boards.extend(resp['items'])
         bookmark = resp['bookmark']
     return pin_boards
