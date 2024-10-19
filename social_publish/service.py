@@ -149,13 +149,9 @@ def request_pinterest(
         'Content-Type': 'application/json'
     }
 
-    # Check rate limits
-    current_time = time.time()
-    if rate_limits[category]["remaining"] <= 1 and current_time < rate_limits[category]["reset_time"]:
-        wait_time = max(rate_limits[category]["reset_time"] - current_time, 0)
-        if wait_time > 0:
-            print(f"Rate limit reached for {category}. Waiting for {wait_time} seconds.")
-            time.sleep(wait_time)
+    if rate_limits[category]["remaining"] <= 1:
+        print(f"Rate limit reached for {category}. Waiting for {wait_time} seconds.")
+        time.sleep(60)
 
     try:
         if call_type == 'get':
