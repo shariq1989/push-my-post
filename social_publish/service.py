@@ -25,8 +25,8 @@ TWITTER_ACCESS_TOKEN_SECRET = env("TWITTER_ACCESS_TOKEN_SECRET")
 
 # Global variables for rate limiting
 rate_limits = {
-    "org_write": {"calls_per_min": 100, "remaining": 100, "reset_time": 0},
-    "org_read": {"calls_per_min": 1000, "remaining": 1000, "reset_time": 0},
+    "org_write": {"calls_per_min": 90, "remaining": 90, "reset_time": 0},
+    "org_read": {"calls_per_min": 900, "remaining": 900, "reset_time": 0},
     # Add other categories as needed
 }
 
@@ -106,7 +106,7 @@ def create_tweet(tweet_data):
 
     # Handle rate limiting
     if response.status_code == 429:
-        reset_time = response.headers.get('x-rate-limit-reset')
+        reset_time = 60
         if reset_time:
             sleep_time = int(reset_time) - int(time.time())
             if sleep_time > 0:
@@ -167,12 +167,6 @@ def request_pinterest(
 
         response.raise_for_status()
 
-        # Update rate limit info
-        rate_limits[category]["remaining"] = int(
-            response.headers.get('X-RateLimit-Remaining', rate_limits[category]["remaining"]))
-        rate_limits[category]["reset_time"] = int(
-            response.headers.get('X-RateLimit-Reset', rate_limits[category]["reset_time"]))
-
         resp_json = response.json()
         if response.status_code not in {200, 201}:
             error_message = resp_json
@@ -182,9 +176,7 @@ def request_pinterest(
 
     except requests.exceptions.RequestException as e:
         if response.status_code == 429:
-            retry_after = int(response.headers.get('Retry-After', 1))
-            print(f"Rate limit exceeded for {category}. Retrying after {retry_after} seconds.")
-            time.sleep(retry_after)
+            time.sleep(60)
             return request_pinterest(endpoint, category, call_type, data, access_token, query_params)
         else:
             logger.error(f"Error making Pinterest call: {e}")
