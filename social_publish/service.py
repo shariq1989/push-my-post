@@ -118,6 +118,15 @@ def create_tweet(tweet_data):
     return response.json()
 
 
+def reset_rate_limits():
+    global rate_limits
+    current_time = time.time()
+    for category in rate_limits:
+        if current_time - rate_limits[category]["reset_time"] >= 60:  # 60 seconds have passed
+            rate_limits[category]["remaining"] = rate_limits[category]["calls_per_min"]
+            rate_limits[category]["reset_time"] = current_time
+
+
 def request_pinterest(
         endpoint: str,
         category: str = 'org_write',
@@ -149,9 +158,15 @@ def request_pinterest(
         'Content-Type': 'application/json'
     }
 
+    reset_rate_limits()  # Reset rate limits if necessary
+
     if rate_limits[category]["remaining"] <= 1:
-        print(f"Rate limit reached for {category}. Waiting for {wait_time} seconds.")
-        time.sleep(60)
+        wait_time = 60 - (time.time() - rate_limits[category]["reset_time"])
+        print(f"Rate limit reached for {category}. Waiting for {wait_time:.2f} seconds.")
+        time.sleep(max(wait_time, 0))
+        reset_rate_limits()  # Reset again after waiting
+
+    rate_limits[category]["remaining"] -= 1  # Decrement remaining calls
 
     try:
         if call_type == 'get':
@@ -172,6 +187,7 @@ def request_pinterest(
 
     except requests.exceptions.RequestException as e:
         if response.status_code == 429:
+            print(f"Rate limit exceeded for {category}. Retrying after 60 seconds.")
             time.sleep(60)
             return request_pinterest(endpoint, category, call_type, data, access_token, query_params)
         else:
