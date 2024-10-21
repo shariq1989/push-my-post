@@ -253,7 +253,7 @@ def create_pinterest_pin(post_id, input_data, pin_user):
 
     try:
         # Call the Celery task to request Pinterest asynchronously
-        task = request_pinterest_task.delay(
+        task = request_pinterest.delay(
             endpoint=api_endpoint,
             category='org_write',  # Or another category based on your rate limits
             call_type='post',
