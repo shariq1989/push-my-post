@@ -61,16 +61,17 @@ def pin_publish(request):
             pin_copy['board'] = board_id
             create_pinterest_pin(post_id, pin_copy, pin_user)
             pin_image_url = pin_copy.get('pin_image_url', None)
-            if pin_image_url is not None:
+            if pin_image_url is not None and pin_image_url != pin_copy.get('image'):
                 pin_copy['image'] = pin_image_url
                 create_pinterest_pin(post_id, pin_copy, pin_user)
-            total_pins_created += 1  # Increment total_pins_created for each pin created
+                total_pins_created += 1  # Increment total_pins_created for each pin created
+            else:
+                logger.info(f"Pin image doesn't exist")
 
     context = {
         'success_message': f"{total_pins_created} pins published successfully!"
     }
     return render(request, 'home.html', context)
-
 
 def new_board(request):
     pass
