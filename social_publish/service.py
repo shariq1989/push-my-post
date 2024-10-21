@@ -3,6 +3,7 @@ import requests
 import base64
 import time
 from typing import Dict, Any, Optional
+from celery import shared_task
 from requests.exceptions import HTTPError
 from django.utils import timezone
 from environs import Env
@@ -25,8 +26,8 @@ TWITTER_ACCESS_TOKEN_SECRET = env("TWITTER_ACCESS_TOKEN_SECRET")
 
 # Global variables for rate limiting
 rate_limits = {
-    "org_write": {"calls_per_min": 90, "remaining": 90, "reset_time": 0},
-    "org_read": {"calls_per_min": 900, "remaining": 900, "reset_time": 0},
+    "org_write": {"calls_per_min": 90, "reset_time": time.time() + 60},
+    "org_read": {"calls_per_min": 900, "reset_time": time.time() + 60},
     # Add other categories as needed
 }
 
@@ -119,15 +120,19 @@ def create_tweet(tweet_data):
 
 
 def reset_rate_limits():
-    global rate_limits
-    current_time = time.time()
+    """Function to reset rate limits after hitting them."""
     for category in rate_limits:
-        if current_time - rate_limits[category]["reset_time"] >= 60:  # 60 seconds have passed
-            rate_limits[category]["remaining"] = rate_limits[category]["calls_per_min"]
-            rate_limits[category]["reset_time"] = current_time
+        if category == 'org_write':
+            rate_limits[category]["remaining"] = 100
+            rate_limits[category]["reset_time"] = time.time() + 60
+        elif category == 'org_read':
+            rate_limits[category]["remaining"] = 900
+            rate_limits[category]["reset_time"] = time.time() + 60
 
 
+@shared_task(bind=True, max_retries=5, default_retry_delay=60)
 def request_pinterest(
+        self,
         endpoint: str,
         category: str = 'org_write',
         call_type: str = 'get',
@@ -137,7 +142,6 @@ def request_pinterest(
 ) -> Optional[Dict[str, Any]]:
     global rate_limits
 
-    # Type checking
     if not isinstance(category, str):
         raise TypeError(f"'category' must be a string, not {type(category)}")
 
@@ -188,8 +192,7 @@ def request_pinterest(
     except requests.exceptions.RequestException as e:
         if response.status_code == 429:
             print(f"Rate limit exceeded for {category}. Retrying after 60 seconds.")
-            time.sleep(60)
-            return request_pinterest(endpoint, category, call_type, data, access_token, query_params)
+            self.retry(exc=e)  # Celery will automatically retry after delay
         else:
             logger.error(f"Error making Pinterest call: {e}")
             print(f'Pinterest request. Endpoint: {endpoint}, call: {call_type}, headers:{headers} data: {data}')
@@ -249,26 +252,23 @@ def create_pinterest_pin(post_id, input_data, pin_user):
     }
 
     try:
-        # Make a POST request to create the pin using the request_pinterest helper
-        response = request_pinterest(
+        # Call the Celery task to request Pinterest asynchronously
+        task = request_pinterest_task.delay(
             endpoint=api_endpoint,
+            category='org_write',  # Or another category based on your rate limits
             call_type='post',
             data=pin_data,
             access_token=pin_user.access_token
         )
 
-        if 'id' in response:
-            # Pin creation was successful
-            logger.info("Pin created successfully.")
-            return True
-        else:
-            # Pin creation failed
-            logger.error("Pin creation failed.")
-            return False
+        # Optionally check task status (non-blocking) or handle post-task logic here
+        logger.info(f"Pin creation task queued for post_id {post_id}. Task ID: {task.id}")
+        return task.id
+
     except Exception as e:
-        # Handle exceptions that may occur during the request
-        logger.exception(f"An error occurred: {str(e)}")
-        return False
+        # Handle exceptions that may occur when queuing the task
+        logger.error(f"Failed to queue Pinterest pin creation task for post_id {post_id}: {e}")
+        return None
 
 
 def get_boards(pin_user):

@@ -1,3 +1,5 @@
+version: '3'
+
 services:
   web:
     build: .
@@ -8,6 +10,7 @@ services:
       - "8000:8000"
     depends_on:
       - db
+      - redis
     environment:
       - "DJANGO_SECRET_KEY=django-insecure-z4nyx@wkok1(98%kl5^!$m_316z)_d-h2yd6@zxgzten7@z4wf"
       - "DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1,[::1],0.0.0.0"
@@ -18,11 +21,46 @@ services:
       - "DJANGO_SECURE_HSTS_PRELOAD=False"
       - "DJANGO_SESSION_COOKIE_SECURE=False"
       - "DJANGO_CSRF_COOKIE_SECURE=False"
+
   db:
     image: postgres:13
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     environment:
       - "POSTGRES_HOST_AUTH_METHOD=trust"
+
+  redis:
+    image: redis:6.2
+    ports:
+      - "6379:6379"
+
+  celery:
+    build: .
+    command: celery -A core worker --loglevel=info
+    volumes:
+      - .:/code
+    depends_on:
+      - redis
+      - db
+    environment:
+      - "DJANGO_SECRET_KEY=django-insecure-z4nyx@wkok1(98%kl5^!$m_316z)_d-h2yd6@zxgzten7@z4wf"
+      - "DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1,[::1],0.0.0.0"
+      - "DJANGO_DEBUG=True"
+      - "CELERY_BROKER_URL=redis://redis:6379/0"
+
+  celery-beat:
+    build: .
+    command: celery -A core beat --loglevel=info
+    volumes:
+      - .:/code
+    depends_on:
+      - redis
+      - db
+    environment:
+      - "DJANGO_SECRET_KEY=django-insecure-z4nyx@wkok1(98%kl5^!$m_316z)_d-h2yd6@zxgzten7@z4wf"
+      - "DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1,[::1],0.0.0.0"
+      - "DJANGO_DEBUG=True"
+      - "CELERY_BROKER_URL=redis://redis:6379/0"
+
 volumes:
   postgres_data:
