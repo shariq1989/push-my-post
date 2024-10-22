@@ -68,10 +68,7 @@
 
                                 {% endfor %}
                             </select></div>
-                        <button type="button" class="btn btn-primary" data-bs-toggle="modal"
-                                data-bs-target="#addBlogModal">
-                            Add New Blog <strong>+</strong>
-                        </button>
+                        <a href="{% url 'create_board' %}" class="btn-primary btn disabled">Create new board</a>
                         <!-- Modal -->
                         <div class="modal fade" id="createBoardModal" tabindex="-1"
                              aria-labelledby="createBoardModalLabel"
