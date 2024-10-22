@@ -68,7 +68,9 @@
 
                                 {% endfor %}
                             </select></div>
-                        <a href="{% url 'create_board' %}" class="btn-primary btn disabled">Create new board</a>
+                        <div class="col-4">
+                            <a href="{% url 'create_board' %}" class="btn-primary btn">Create new board</a>
+                        </div>
                         <!-- Modal -->
                         <div class="modal fade" id="createBoardModal" tabindex="-1"
                              aria-labelledby="createBoardModalLabel"
