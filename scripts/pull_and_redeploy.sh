@@ -10,7 +10,7 @@ git pull
 
 echo "Shutting down containers"
 # Stop and remove Docker containers
-sudo docker-compose down
+docker-compose down --remove-orphans
 
 echo "Bringing containers back up"
 # Build and start Docker containers using the production configuration
