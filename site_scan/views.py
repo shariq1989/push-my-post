@@ -6,7 +6,7 @@ from django.db.models import Q
 from environs import Env
 from .service import sanitize_url, parse_sitemap, fetch_sites, fetch_trending_posts, find_trending_blog_posts, \
     save_site
-from social_publish.service import pinterest_login, get_pinterest_user_data
+from social_publish.service import pinterest_login, get_pinterest_user_data, create_board
 import sys
 from .models import Site, BlogPost
 from social_publish.models import PinUser
@@ -63,6 +63,13 @@ def scan_submit(request):
         'boards': boards
     }
     return render(request, 'social_publish/pin_publish.html', context)
+
+
+def create_board_view(request):
+    pin_user = PinUser.objects.get(user=request.user)
+    title = request.POST.get("boardName", "")
+    description = request.POST.get("boardDescription", "")
+    create_board(title=title, description=description, pin_user=pin_user)
 
 
 def search_submit(request, site_id):

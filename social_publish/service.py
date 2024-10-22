@@ -202,15 +202,34 @@ def request_pinterest(
     return resp_json
 
 
-def create_board(name, description, privacy='PUBLIC'):
+def create_board(name: str, description: str, pin_user, privacy: str = 'PUBLIC') -> dict:
+    if not isinstance(name, str) or not isinstance(description, str):
+        raise TypeError("Name and description must be strings")
+
+    valid_privacy_options = ["PUBLIC", "PROTECTED", "SECRET"]
+    if privacy not in valid_privacy_options:
+        raise ValueError(f"Privacy must be one of {valid_privacy_options}")
+
     data = {
         "name": name,
         "description": description,
         "privacy": privacy
     }
-    resp = request_pinterest('boards', 'post', data)
-    save_board(resp)
-    return resp
+
+    try:
+        resp = request_pinterest(endpoint='boards', category='org_write', call_type='post', data=data,
+                                 access_token=pin_user.access_token)
+        if resp:
+            try:
+                save_board(resp)
+            except Exception as e:
+                logger.error(f"Failed to save board locally: {e}")
+                # Depending on your requirements, you might want to raise this error
+                # or continue since the board was created on Pinterest successfully
+        return resp
+    except Exception as e:
+        logger.error(f"Failed to create board on Pinterest: {e}")
+        raise
 
 
 def save_board(resp):
