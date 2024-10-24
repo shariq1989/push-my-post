@@ -69,7 +69,7 @@ def create_board_view(request):
     pin_user = PinUser.objects.get(user=request.user)
     title = request.POST.get("boardName", "")
     description = request.POST.get("boardDescription", "")
-    create_board(title=title, description=description, pin_user=pin_user)
+    create_board(name=title, description=description, pin_user=pin_user)
 
 
 def search_submit(request, site_id):
