@@ -69,6 +69,8 @@ def create_board_view(request):
     pin_user = PinUser.objects.get(user=request.user)
     title = request.POST.get("boardName", "")
     description = request.POST.get("boardDescription", "")
+    if not title or not description:
+        return HttpResponseBadRequest("Name and description are required")
     create_board(name=title, description=description, pin_user=pin_user)
 
 
