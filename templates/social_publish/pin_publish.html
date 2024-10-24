@@ -72,50 +72,6 @@
                             <a class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createBoardModal">
                                 Create new board</a>
                         </div>
-                        <!-- Modal -->
-                        <div class="modal fade" id="createBoardModal" tabindex="-1"
-                             aria-labelledby="createBoardModalLabel"
-                             aria-hidden="true">
-                            <div class="modal-dialog">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="createBoardModalLabel">Create New Board</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                aria-label="Close"></button>
-                                    </div>
-                                    <form action="{% url 'create_board' %}" method="post">
-                                        {% csrf_token %}
-                                        <div class="modal-body">
-                                            <div class="mb-3">
-                                                <label for="boardName" class="form-label">Board Name</label>
-                                                <input type="text" class="form-control" id="boardName" name="boardName"
-                                                       required>
-                                            </div>
-                                            <div class="mb-3">
-                                                <label for="boardDescription" class="form-label">Description</label>
-                                                <textarea class="form-control" id="boardDescription"
-                                                          name="boardDescription"
-                                                          rows="3"
-                                                          required></textarea>
-                                            </div>
-                                            <div class="mb-3">
-                                                <label for="boardPrivacy" class="form-label">Privacy Setting</label>
-                                                <select class="form-select" id="boardPrivacy" name="privacy">
-                                                    <option value="PUBLIC">Public</option>
-                                                    <option value="PRIVATE">Private</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                                                Cancel
-                                            </button>
-                                            <button type="submit" class="btn btn-primary">Create Board</button>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -123,6 +79,50 @@
             {% endfor %}
             <button type="submit" class="btn btn-primary">Publish</button>
         </form>
+        <!-- Modal -->
+        <div class="modal fade" id="createBoardModal" tabindex="-1"
+             aria-labelledby="createBoardModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="createBoardModalLabel">Create New Board</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                aria-label="Close"></button>
+                    </div>
+                    <form action="{% url 'create_board' %}" method="post">
+                        {% csrf_token %}
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label for="boardName" class="form-label">Board Name</label>
+                                <input type="text" class="form-control" id="boardName" name="boardName"
+                                       required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="boardDescription" class="form-label">Description</label>
+                                <textarea class="form-control" id="boardDescription"
+                                          name="boardDescription"
+                                          rows="3"
+                                          required></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="boardPrivacy" class="form-label">Privacy Setting</label>
+                                <select class="form-select" id="boardPrivacy" name="privacy">
+                                    <option value="PUBLIC">Public</option>
+                                    <option value="PRIVATE">Private</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                Cancel
+                            </button>
+                            <button type="submit" class="btn btn-primary">Create Board</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 <script>
