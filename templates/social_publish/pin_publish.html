@@ -69,7 +69,8 @@
                                 {% endfor %}
                             </select></div>
                         <div class="col-4">
-                            <a href="{% url 'create_board' %}" class="btn-primary btn">Create new board</a>
+                            <a class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createBoardModal">
+                                Create new board</a>
                         </div>
                         <!-- Modal -->
                         <div class="modal fade" id="createBoardModal" tabindex="-1"
