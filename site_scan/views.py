@@ -74,7 +74,9 @@ def create_board_view(request):
         return HttpResponseBadRequest("Name and description are required")
     create_board(name=title, description=description, pin_user=pin_user)
     # TODO: return back to previous page with selected posts
+    context = {}
     return render(request, 'social_publish/pin_publish.html', context)
+
 
 def search_submit(request, site_id):
     # Get the search query from the form

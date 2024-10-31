@@ -219,13 +219,6 @@ def create_board(name: str, description: str, pin_user, privacy: str = 'PUBLIC')
     try:
         resp = request_pinterest(endpoint='boards', category='org_write', call_type='post', data=data,
                                  access_token=pin_user.access_token)
-        if resp:
-            try:
-                save_board(resp)
-            except Exception as e:
-                logger.error(f"Failed to save board locally: {e}")
-                # Depending on your requirements, you might want to raise this error
-                # or continue since the board was created on Pinterest successfully
         return resp
     except Exception as e:
         logger.error(f"Failed to create board on Pinterest: {e}")
