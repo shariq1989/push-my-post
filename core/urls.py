@@ -22,6 +22,6 @@ urlpatterns = [
     path("accounts/", include("allauth.urls")),
     # Local apps
     path("", include("pages.urls")),
-    path("scan", include("site_scan.urls")),
+    path("scan/", include("site_scan.urls")),
     path("social_publish/", include("social_publish.urls"))
 ]

@@ -67,7 +67,8 @@
                                 </option>
 
                                 {% endfor %}
-                            </select></div>
+                            </select>
+                        </div>
                         <div class="col-4">
                             <a class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createBoardModal">
                                 Create new board</a>
@@ -90,8 +91,7 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal"
                                 aria-label="Close"></button>
                     </div>
-                    <form action="{% url 'create_board' %}" method="post">
-                        {% csrf_token %}
+                    <form>
                         <div class="modal-body">
                             <div class="mb-3">
                                 <label for="boardName" class="form-label">Board Name</label>
@@ -117,7 +117,7 @@
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                                 Cancel
                             </button>
-                            <button type="submit" class="btn btn-primary">Create Board</button>
+                            <button type="button" onclick="newBoardJS()" class="btn btn-primary">Create Board</button>
                         </div>
                     </form>
                 </div>
@@ -126,8 +126,56 @@
     </div>
 </div>
 <script>
-    $(document).ready(function() {
-        $('.js-example-basic-multiple').select2();
-    });
+   $(document).ready(function() {
+       $('.js-example-basic-multiple').select2();
+   });
+
+   function newBoardJS(){
+       // Get values from form
+        const title = document.getElementById('boardName').value;
+        const description = document.getElementById('boardDescription').value;
+        const privacy = document.getElementById('boardPrivacy').value;
+
+        // Validate that required fields are filled
+        if (!title || !description) {
+            alert('Please fill in all required fields');
+            return;
+        }
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+       // Build the request to create the board
+       const url = `/scan/create_board/`;
+       const options = {
+           method: 'POST',
+           headers: {
+                'X-CSRFToken': csrfToken,  // Add CSRF token here
+                'Content-Type': 'application/json',
+            },
+           body: JSON.stringify({
+               title, description
+           }),
+           credentials: 'same-origin'
+       };
+
+       // Make the request and handle the response
+       fetch(url, options)
+           .then((response) => {
+               if (response.ok) {
+                   // Close the modal
+                   const modalElement = document.getElementById('createBoardModal');
+                   const modalInstance = bootstrap.Modal.getInstance(modalElement);
+                   if (modalInstance) {
+                       modalInstance.hide();
+                   }
+               } else {
+                   // Handle error
+                    const errorData = response;
+                    console.error('Server Error:', errorData);
+               }
+           })
+           .catch((error) => {
+               console.error(`Error creating board: ${error}`);
+           });
+    }
 </script>
 {% endblock %}

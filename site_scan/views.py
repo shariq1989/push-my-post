@@ -1,7 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.db.models import Q
-from django.http import HttpResponseBadRequest
+from django.http import JsonResponse, HttpResponseBadRequest
+import json
 # from PIL import Image, ImageFont, ImageDraw
 # import praw
 from environs import Env
@@ -50,32 +51,46 @@ def scan_submit(request):
     pin_user, created = PinUser.objects.get_or_create(user=request.user)
     if pin_user.access_token:
         boards = get_pinterest_user_data(pin_user)
+        # pass
     else:
         return pinterest_login()
+        # pass
     # boards = [
-    #    {'name': 'Delicious Desserts'},
-    #    {'name': 'Healthy Recipes'},
-    #    {'name': 'Quick and Easy Meals'},
-    #    {'name': 'Vegetarian Delights'},
-    #    {'name': 'Gourmet Cooking'}
+    #     {'name': 'Delicious Desserts'},
+    #     {'name': 'Healthy Recipes'},
+    #     {'name': 'Quick and Easy Meals'},
+    #     {'name': 'Vegetarian Delights'},
+    #     {'name': 'Gourmet Cooking'}
     # ]
     context = {
         'posts': selected_posts,
-        'boards': boards
+        'boards': boards,
     }
     return render(request, 'social_publish/pin_publish.html', context)
 
 
 def create_board_view(request):
-    pin_user = PinUser.objects.get(user=request.user)
-    title = request.POST.get("boardName", "")
-    description = request.POST.get("boardDescription", "")
-    if not title or not description:
-        return HttpResponseBadRequest("Name and description are required")
-    create_board(name=title, description=description, pin_user=pin_user)
-    # TODO: return back to previous page with selected posts
-    context = {}
-    return render(request, 'social_publish/pin_publish.html', context)
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            title = data.get("title", "")
+            description = data.get("description", "")
+            if not title or not description:
+                return HttpResponseBadRequest("Name and description are required")
+            if not request.user.is_authenticated:
+                return HttpResponseBadRequest("User is not authenticated")
+            try:
+                pin_user = PinUser.objects.get(user=request.user)
+            except PinUser.DoesNotExist:
+                return HttpResponseBadRequest("PinUser entry not found for the logged-in user.")
+            create_board(name=title, description=description, pin_user=pin_user)
+
+            # Respond with JSON if successful
+            return JsonResponse({"message": "Board created successfully"})
+        except json.JSONDecodeError:
+            return HttpResponseBadRequest("Invalid JSON")
+    else:
+        return HttpResponseBadRequest("Only POST requests are allowed")
 
 
 def search_submit(request, site_id):

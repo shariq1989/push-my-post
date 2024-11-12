@@ -73,6 +73,7 @@ def pin_publish(request):
     }
     return render(request, 'home.html', context)
 
+
 def new_board(request):
     pass
 
@@ -151,6 +152,7 @@ def pinterest_auth(request):
         return render(request, 'home.html', context)
     else:
         context = {
-            'error_message': "We experienced an error connecting to your Pinterest account. Please contact us for support."
+            'error_message': "We experienced an error connecting to your Pinterest account. Please contact us for "
+                             "support."
         }
         return render(request, 'home.html', context)
