@@ -126,12 +126,12 @@
     </div>
 </div>
 <script>
-   $(document).ready(function() {
-       $('.js-example-basic-multiple').select2();
-   });
+    $(document).ready(function() {
+        $('.js-example-basic-multiple').select2();
+    });
 
-   function newBoardJS(){
-       // Get values from form
+    function newBoardJS() {
+        // Get values from form
         const title = document.getElementById('boardName').value;
         const description = document.getElementById('boardDescription').value;
         const privacy = document.getElementById('boardPrivacy').value;
@@ -141,41 +141,92 @@
             alert('Please fill in all required fields');
             return;
         }
+
         const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
-       // Build the request to create the board
-       const url = `/scan/create_board/`;
-       const options = {
-           method: 'POST',
-           headers: {
-                'X-CSRFToken': csrfToken,  // Add CSRF token here
-                'Content-Type': 'application/json',
+        // Build the request to create the board
+        const url = `/scan/create_board/`;
+        const options = {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken,
+                'Content-Type': 'application/json'
             },
-           body: JSON.stringify({
-               title, description
-           }),
-           credentials: 'same-origin'
-       };
+            body: JSON.stringify({
+                title,
+                description
+            }),
+            credentials: 'same-origin'
+        };
 
-       // Make the request and handle the response
-       fetch(url, options)
-           .then((response) => {
-               if (response.ok) {
-                   // Close the modal
-                   const modalElement = document.getElementById('createBoardModal');
-                   const modalInstance = bootstrap.Modal.getInstance(modalElement);
-                   if (modalInstance) {
-                       modalInstance.hide();
-                   }
-               } else {
-                   // Handle error
-                    const errorData = response;
-                    console.error('Server Error:', errorData);
-               }
-           })
-           .catch((error) => {
-               console.error(`Error creating board: ${error}`);
-           });
+        // Make the request and handle the response
+        fetch(url, options)
+            .then(response => {
+                if (response.ok) {
+                    // Close the modal
+                    const modalElement = document.getElementById('createBoardModal');
+                    const modalInstance = bootstrap.Modal.getInstance(modalElement);
+                    if (modalInstance) {
+                        modalInstance.hide();
+                    }
+                    fetchUserBoards();
+                } else {
+                    return response.json().then(errorData => {
+                        console.error('Server Error:', errorData);
+                    });
+                }
+            })
+            .catch(error => {
+                console.error(`Error creating board: ${error}`);
+            });
     }
+
+    function fetchUserBoards() {
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        fetch('/scan/update_boards_list/', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            credentials: 'same-origin'
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            updateBoardDropdowns(data.boards);
+        })
+        .catch(error => {
+            console.error('Error fetching boards:', error);
+        });
+    }
+
+    function updateBoardDropdowns(boards) {
+        // Select all elements with an id starting with "board_"
+        const dropdowns = document.querySelectorAll('select[id^="board_"]');
+
+        dropdowns.forEach(dropdown => {
+            // Clear existing options in each dropdown
+            dropdown.innerHTML = '';
+
+            // Populate each dropdown with new board options
+            boards.forEach(board => {
+                const option = document.createElement('option');
+                option.value = board.id;
+                option.textContent = board.name;
+
+                // Set option as selected if needed (replace with actual selection logic)
+                // option.selected = someCondition;
+
+                dropdown.appendChild(option);
+            });
+        });
+    }
+
 </script>
 {% endblock %}

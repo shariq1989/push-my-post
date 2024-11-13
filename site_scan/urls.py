@@ -3,7 +3,7 @@ from django.urls import path
 
 from . import views
 from .views import home, submit_site, scan_submit, remove_site, get_site_recent_posts, get_site_trending_posts, \
-    search_submit, create_board_view
+    search_submit, create_board_view, update_boards_list
 
 urlpatterns = [
     path("", home, name="site_scan"),
@@ -14,5 +14,6 @@ urlpatterns = [
     path('site/<int:site_id>/recent/', views.get_site_recent_posts, name='get_site_recent_posts'),
     path("scan_submit/", scan_submit, name="scan_submit"),
     path("search/<int:site_id>/", search_submit, name="search"),
-    path("create_board/", create_board_view, name="create_board")
+    path("create_board/", create_board_view, name="create_board"),
+    path("update_boards_list/", update_boards_list, name="update_boards_list")
 ]

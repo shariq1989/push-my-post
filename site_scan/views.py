@@ -42,6 +42,25 @@ def remove_site(request, site_id):
     return redirect('site_scan')
 
 
+def update_boards_list(request):
+    if not request.user.is_authenticated:
+        return HttpResponseBadRequest("User is not authenticated")
+
+    try:
+        pin_user = PinUser.objects.get(user=request.user)
+    except PinUser.DoesNotExist:
+        return HttpResponseBadRequest("PinUser entry not found for the logged-in user.")
+
+    if pin_user.access_token:
+        # boards = get_pinterest_user_data(pin_user)
+        boards = [
+            {'name': 'test'}
+        ]
+        return JsonResponse({"boards": boards})
+
+    return HttpResponseBadRequest("No access token found.")
+
+
 def scan_submit(request):
     selected_posts_ids = request.POST.getlist('selected_pages')
     selected_posts = BlogPost.objects.filter(pk__in=selected_posts_ids)

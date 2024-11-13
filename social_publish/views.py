@@ -74,10 +74,6 @@ def pin_publish(request):
     return render(request, 'home.html', context)
 
 
-def new_board(request):
-    pass
-
-
 def save_pinterest_access_token(request, access_token, refresh_token, access_token_expiration,
                                 refresh_token_expiration):
     # Ensure the user is logged in
