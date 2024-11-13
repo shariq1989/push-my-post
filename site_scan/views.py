@@ -52,10 +52,7 @@ def update_boards_list(request):
         return HttpResponseBadRequest("PinUser entry not found for the logged-in user.")
 
     if pin_user.access_token:
-        # boards = get_pinterest_user_data(pin_user)
-        boards = [
-            {'name': 'test'}
-        ]
+        boards = get_pinterest_user_data(pin_user)
         return JsonResponse({"boards": boards})
 
     return HttpResponseBadRequest("No access token found.")
