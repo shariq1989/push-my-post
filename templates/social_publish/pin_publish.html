@@ -163,18 +163,21 @@
         fetch(url, options)
             .then(response => {
                 if (response.ok) {
-                    // Close the modal
-                    const modalElement = document.getElementById('createBoardModal');
-                    const modalInstance = bootstrap.Modal.getInstance(modalElement);
-                    if (modalInstance) {
-                        modalInstance.hide();
-                    }
-                    fetchUserBoards();
+                    // Fetch the updated list of boards before hiding the modal
+                    return fetchUserBoards();
                 } else {
                     return response.json().then(errorData => {
                         console.error('Server Error:', errorData);
                     });
                 }
+            })
+            .then(() => {
+                // Close the modal after fetching boards
+                const modalElement = document.getElementById('createBoardModal');
+                const modalInstance = bootstrap.Modal.getInstance(modalElement);
+                if (modalInstance) {
+                    modalInstance.hide();
+            }
             })
             .catch(error => {
                 console.error(`Error creating board: ${error}`);
