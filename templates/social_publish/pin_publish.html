@@ -158,57 +158,27 @@
             }),
             credentials: 'same-origin'
         };
-
-        // Make the request and handle the response
         fetch(url, options)
-            .then(response => {
-                if (response.ok) {
-                    // Fetch the updated list of boards before hiding the modal
-                    return fetchUserBoards();
-                } else {
-                    return response.json().then(errorData => {
-                        console.error('Server Error:', errorData);
-                    });
-                }
-            })
-            .then(() => {
-                // Close the modal after fetching boards
+        .then(response => response.json())
+        .then(data => {
+            if (data.boards) {
+                // Use the updated list of boards from the response
+                updateBoardDropdowns(data.boards);
+
+                // Close the modal
                 const modalElement = document.getElementById('createBoardModal');
                 const modalInstance = bootstrap.Modal.getInstance(modalElement);
                 if (modalInstance) {
                     modalInstance.hide();
+                }
+            } else {
+                console.error('Error in response data:', data);
             }
-            })
-            .catch(error => {
-                console.error(`Error creating board: ${error}`);
-            });
-    }
-
-    function fetchUserBoards() {
-        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-
-        fetch('/scan/update_boards_list/', {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': csrfToken
-            },
-            credentials: 'same-origin'
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
-        })
-        .then(data => {
-            updateBoardDropdowns(data.boards);
         })
         .catch(error => {
-            console.error('Error fetching boards:', error);
+            console.error(`Error creating board: ${error}`);
         });
     }
-
     function updateBoardDropdowns(boards) {
         // Select all elements with an id starting with "board_"
         const dropdowns = document.querySelectorAll('select[id^="board_"]');

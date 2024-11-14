@@ -44,18 +44,20 @@ def remove_site(request, site_id):
 
 def update_boards_list(request):
     if not request.user.is_authenticated:
-        return HttpResponseBadRequest("User is not authenticated")
+        return JsonResponse({"error": "User is not authenticated"}, status=400)
 
     try:
         pin_user = PinUser.objects.get(user=request.user)
     except PinUser.DoesNotExist:
-        return HttpResponseBadRequest("PinUser entry not found for the logged-in user.")
+        return JsonResponse({"error": "PinUser entry not found for the logged-in user."}, status=400)
 
     if pin_user.access_token:
         boards = get_pinterest_user_data(pin_user)
-        return JsonResponse({"boards": boards})
+        # Ensure boards are in JSON serializable format
+        board_data = [{"id": board.id, "name": board.name} for board in boards]
+        return JsonResponse({"boards": board_data})
 
-    return HttpResponseBadRequest("No access token found.")
+    return JsonResponse({"error": "No access token found."}, status=400)
 
 
 def scan_submit(request):
@@ -86,27 +88,29 @@ def scan_submit(request):
 
 
 def create_board_view(request):
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            title = data.get("title", "")
-            description = data.get("description", "")
-            if not title or not description:
-                return HttpResponseBadRequest("Name and description are required")
-            if not request.user.is_authenticated:
-                return HttpResponseBadRequest("User is not authenticated")
-            try:
-                pin_user = PinUser.objects.get(user=request.user)
-            except PinUser.DoesNotExist:
-                return HttpResponseBadRequest("PinUser entry not found for the logged-in user.")
-            create_board(name=title, description=description, pin_user=pin_user)
+    try:
+        data = json.loads(request.body)
+        title = data.get("title", "")
+        description = data.get("description", "")
 
-            # Respond with JSON if successful
-            return JsonResponse({"message": "Board created successfully"})
-        except json.JSONDecodeError:
-            return HttpResponseBadRequest("Invalid JSON")
-    else:
-        return HttpResponseBadRequest("Only POST requests are allowed")
+        if not title or not description:
+            return JsonResponse({"error": "Name and description are required"}, status=400)
+
+        if not request.user.is_authenticated:
+            return JsonResponse({"error": "User is not authenticated"}, status=400)
+
+        try:
+            pin_user = PinUser.objects.get(user=request.user)
+        except PinUser.DoesNotExist:
+            return JsonResponse({"error": "PinUser entry not found for the logged-in user."}, status=400)
+
+        create_board(name=title, description=description, pin_user=pin_user)
+
+        # Respond with the updated board list
+        return update_boards_list(request)
+
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
 
 
 def search_submit(request, site_id):
