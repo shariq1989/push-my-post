@@ -44,20 +44,18 @@ def remove_site(request, site_id):
 
 def update_boards_list(request):
     if not request.user.is_authenticated:
-        return JsonResponse({"error": "User is not authenticated"}, status=400)
+        return HttpResponseBadRequest("User is not authenticated")
 
     try:
         pin_user = PinUser.objects.get(user=request.user)
     except PinUser.DoesNotExist:
-        return JsonResponse({"error": "PinUser entry not found for the logged-in user."}, status=400)
+        return HttpResponseBadRequest("PinUser entry not found for the logged-in user.")
 
     if pin_user.access_token:
         boards = get_pinterest_user_data(pin_user)
-        # Ensure boards are in JSON serializable format
-        board_data = [{"id": board.id, "name": board.name} for board in boards]
-        return JsonResponse({"boards": board_data})
+        return JsonResponse({"boards": boards})
 
-    return JsonResponse({"error": "No access token found."}, status=400)
+    return HttpResponseBadRequest("No access token found.")
 
 
 def scan_submit(request):
