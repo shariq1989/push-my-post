@@ -1,12 +1,14 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.db.models import Q
+from django.http import JsonResponse, HttpResponseBadRequest
+import json
 # from PIL import Image, ImageFont, ImageDraw
 # import praw
 from environs import Env
 from .service import sanitize_url, parse_sitemap, fetch_sites, fetch_trending_posts, find_trending_blog_posts, \
     save_site
-from social_publish.service import pinterest_login, get_pinterest_user_data
+from social_publish.service import pinterest_login, get_pinterest_user_data, create_board
 import sys
 from .models import Site, BlogPost
 from social_publish.models import PinUser
@@ -40,6 +42,22 @@ def remove_site(request, site_id):
     return redirect('site_scan')
 
 
+def update_boards_list(request):
+    if not request.user.is_authenticated:
+        return HttpResponseBadRequest("User is not authenticated")
+
+    try:
+        pin_user = PinUser.objects.get(user=request.user)
+    except PinUser.DoesNotExist:
+        return HttpResponseBadRequest("PinUser entry not found for the logged-in user.")
+
+    if pin_user.access_token:
+        boards = get_pinterest_user_data(pin_user)
+        return JsonResponse({"boards": boards})
+
+    return HttpResponseBadRequest("No access token found.")
+
+
 def scan_submit(request):
     selected_posts_ids = request.POST.getlist('selected_pages')
     selected_posts = BlogPost.objects.filter(pk__in=selected_posts_ids)
@@ -49,20 +67,48 @@ def scan_submit(request):
     pin_user, created = PinUser.objects.get_or_create(user=request.user)
     if pin_user.access_token:
         boards = get_pinterest_user_data(pin_user)
+        # pass
     else:
         return pinterest_login()
+        # pass
     # boards = [
-    #    {'name': 'Delicious Desserts'},
-    #    {'name': 'Healthy Recipes'},
-    #    {'name': 'Quick and Easy Meals'},
-    #    {'name': 'Vegetarian Delights'},
-    #    {'name': 'Gourmet Cooking'}
+    #     {'name': 'Delicious Desserts'},
+    #     {'name': 'Healthy Recipes'},
+    #     {'name': 'Quick and Easy Meals'},
+    #     {'name': 'Vegetarian Delights'},
+    #     {'name': 'Gourmet Cooking'}
     # ]
     context = {
         'posts': selected_posts,
-        'boards': boards
+        'boards': boards,
     }
     return render(request, 'social_publish/pin_publish.html', context)
+
+
+def create_board_view(request):
+    try:
+        data = json.loads(request.body)
+        title = data.get("title", "")
+        description = data.get("description", "")
+
+        if not title or not description:
+            return JsonResponse({"error": "Name and description are required"}, status=400)
+
+        if not request.user.is_authenticated:
+            return JsonResponse({"error": "User is not authenticated"}, status=400)
+
+        try:
+            pin_user = PinUser.objects.get(user=request.user)
+        except PinUser.DoesNotExist:
+            return JsonResponse({"error": "PinUser entry not found for the logged-in user."}, status=400)
+
+        create_board(name=title, description=description, pin_user=pin_user)
+
+        # Respond with the updated board list
+        return update_boards_list(request)
+
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
 
 
 def search_submit(request, site_id):

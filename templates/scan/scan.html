@@ -51,12 +51,18 @@
                 <div class="col-md-4"></div>
                 <div class="col-md-4">
                     <div class="btn-group" role="group">
-                        <a href="{% url 'site_blog_posts' site_id=site_id %}" class="btn btn-primary active">All
-                            Posts</a>
-                        <a href="{% url 'get_site_trending_posts' site_id=site_id %}" class="btn btn-primary">Trending
-                            Posts</a>
-                        <a href="{% url 'get_site_recent_posts' site_id=site_id %}" class="btn btn-primary">Recent
-                            Posts</a>
+                        <a href="{% url 'site_blog_posts' site_id=site_id %}"
+                           class="btn btn-primary {% if request.resolver_match.url_name == 'site_blog_posts' %}active{% endif %}">
+                            All Posts
+                        </a>
+                        <a href="{% url 'get_site_trending_posts' site_id=site_id %}"
+                           class="btn btn-primary {% if request.resolver_match.url_name == 'get_site_trending_posts' %}active{% endif %}">
+                            Trending Posts
+                        </a>
+                        <a href="{% url 'get_site_recent_posts' site_id=site_id %}"
+                           class="btn btn-primary {% if request.resolver_match.url_name == 'get_site_recent_posts' %}active{% endif %}">
+                            Recent Posts
+                        </a>
                     </div>
                 </div>
                 <div class="col-md-4"></div>

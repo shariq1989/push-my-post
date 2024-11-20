@@ -67,11 +67,11 @@
                                 </option>
 
                                 {% endfor %}
-                            </select></div>
+                            </select>
+                        </div>
                         <div class="col-4">
-                            <!-- TODO-->
-                            <a href="{% url 'new_board' %}" class="btn-primary btn disabled">Create new board (coming
-                                soon)</a>
+                            <a class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createBoardModal">
+                                Create new board</a>
                         </div>
                     </div>
                 </div>
@@ -80,11 +80,126 @@
             {% endfor %}
             <button type="submit" class="btn btn-primary">Publish</button>
         </form>
+        <!-- Modal -->
+        <div class="modal fade" id="createBoardModal" tabindex="-1"
+             aria-labelledby="createBoardModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="createBoardModalLabel">Create New Board</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                aria-label="Close"></button>
+                    </div>
+                    <form>
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label for="boardName" class="form-label">Board Name</label>
+                                <input type="text" class="form-control" id="boardName" name="boardName"
+                                       required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="boardDescription" class="form-label">Description</label>
+                                <textarea class="form-control" id="boardDescription"
+                                          name="boardDescription"
+                                          rows="3"
+                                          required></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="boardPrivacy" class="form-label">Privacy Setting</label>
+                                <select class="form-select" id="boardPrivacy" name="privacy">
+                                    <option value="PUBLIC">Public</option>
+                                    <option value="PRIVATE">Private</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                Cancel
+                            </button>
+                            <button type="button" onclick="newBoardJS()" class="btn btn-primary">Create Board</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 <script>
     $(document).ready(function() {
         $('.js-example-basic-multiple').select2();
     });
+
+    function newBoardJS() {
+        // Get values from form
+        const title = document.getElementById('boardName').value;
+        const description = document.getElementById('boardDescription').value;
+        const privacy = document.getElementById('boardPrivacy').value;
+
+        // Validate that required fields are filled
+        if (!title || !description) {
+            alert('Please fill in all required fields');
+            return;
+        }
+
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        // Build the request to create the board
+        const url = `/scan/create_board/`;
+        const options = {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                title,
+                description
+            }),
+            credentials: 'same-origin'
+        };
+        fetch(url, options)
+        .then(response => response.json())
+        .then(data => {
+            if (data.boards) {
+                // Use the updated list of boards from the response
+                updateBoardDropdowns(data.boards);
+
+                // Close the modal
+                const modalElement = document.getElementById('createBoardModal');
+                const modalInstance = bootstrap.Modal.getInstance(modalElement);
+                if (modalInstance) {
+                    modalInstance.hide();
+                }
+            } else {
+                console.error('Error in response data:', data);
+            }
+        })
+        .catch(error => {
+            console.error(`Error creating board: ${error}`);
+        });
+    }
+    function updateBoardDropdowns(boards) {
+        // Select all elements with an id starting with "board_"
+        const dropdowns = document.querySelectorAll('select[id^="board_"]');
+
+        dropdowns.forEach(dropdown => {
+            // Clear existing options in each dropdown
+            dropdown.innerHTML = '';
+
+            // Populate each dropdown with new board options
+            boards.forEach(board => {
+                const option = document.createElement('option');
+                option.value = board.id;
+                option.textContent = board.name;
+
+                // Set option as selected if needed (replace with actual selection logic)
+                // option.selected = someCondition;
+
+                dropdown.appendChild(option);
+            });
+        });
+    }
+
 </script>
 {% endblock %}

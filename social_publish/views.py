@@ -73,9 +73,6 @@ def pin_publish(request):
     }
     return render(request, 'home.html', context)
 
-def new_board(request):
-    pass
-
 
 def save_pinterest_access_token(request, access_token, refresh_token, access_token_expiration,
                                 refresh_token_expiration):
@@ -151,6 +148,7 @@ def pinterest_auth(request):
         return render(request, 'home.html', context)
     else:
         context = {
-            'error_message': "We experienced an error connecting to your Pinterest account. Please contact us for support."
+            'error_message': "We experienced an error connecting to your Pinterest account. Please contact us for "
+                             "support."
         }
         return render(request, 'home.html', context)
