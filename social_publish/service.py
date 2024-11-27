@@ -313,6 +313,15 @@ def suggest_pinterest_boards(
         min_confidence: float = 0.5,
         max_suggestions: int = 3
 ) -> List[Dict]:
+    # Print input data for debugging
+    print(f"Blog post title: {blog_post.title}")
+    print(f"Blog post description: {blog_post.description}")
+    print(f"Number of user boards: {len(user_boards)}")
+
+    # Print first few board names to verify input
+    print("First few board names:")
+    for board in user_boards[:5]:
+        print(board.get('name', 'No name'))
     """
     Generate board suggestions for a blog post
 
@@ -366,6 +375,7 @@ def suggest_pinterest_boards(
         key=lambda x: x['match_score'],
         reverse=True
     )[:max_suggestions]
+    print(f"Final suggestions: {suggestions}")  # Debug print
 
     return suggestions
 

@@ -9,13 +9,14 @@ class Command(BaseCommand):
     help = 'Save pinterest board suggestions for a users blog posts'
 
     def handle(self, *args, **options):
-        response = suggest_boards()
+        suggest_boards()
         print(response)
 
 
 def suggest_boards():
     # Fetch blog posts
     blog_posts = BlogPost.objects.all()
+    print(f"Total blog posts to process: {blog_posts.count()}")
 
     try:
         pin_user = PinUser.objects.get(user__username='shariq1989')
@@ -26,6 +27,7 @@ def suggest_boards():
     try:
         # Fetch Pinterest boards
         boards = get_pinterest_user_data(pin_user)
+        print(f"Total Pinterest boards to compare: {len(boards)}")
     except Exception as e:
         print(f"Error fetching Pinterest boards: {e}")
         return  # Exit if board fetching fails
@@ -40,8 +42,8 @@ def suggest_boards():
                 min_confidence=0.5,
                 max_suggestions=3
             )
-
             # Save suggestions to database
+            print(f"Suggestions for blog post {blog_post.id}: {suggestions}")
             save_board_suggestions(blog_post, suggestions)
         except Exception as e:
             print(f"Error processing blog post {blog_post.id}: {e}")
