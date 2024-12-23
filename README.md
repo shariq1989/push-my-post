@@ -5,7 +5,7 @@ Run new-project.sh in a directory where you want to create the project folder.
 - SSH into the VPS
 - Create SSH key
 ```shell
-ssh-keygen -t rsa -b 4096"```
+ssh-keygen -t rsa -b 4096
 ```
 - Copy the key
 ```shell
@@ -23,27 +23,23 @@ sudo apt install -y docker.io docker-compose
 ```shell
 mkdir development
 ```
-- Clone repo
+- Clone repo. You'll need to add the new ssh key to github. 
 ```shell
 git clone {repo_url}
-```
-- Set up SSL with Certbot (optional, comment out if not using SSL)
-```shell
-sudo apt install -y certbot python3-certbot-nginx
 ```
 - Move docker-compose for prod
 - Move env file for prod
 ```shell
-~ scp ~/Documents/Development/shariq1989-django-starter/{docker-compose-for-prod.yml} root@root@165.227.205.174:~/
-~ scp ~/Documents/Development/shariq1989-django-starter/{dot env} root@root@165.227.205.174:~/
+scp ~/Documents/Development/shariq1989-django-starter/{docker-compose-for-prod.yml} root@ip:~/
+scp ~/Documents/Development/shariq1989-django-starter/{dot env} root@ip:~/
 ```
 - Start container
 ```shell
-➜  ~ sudo docker-compose -f docker-compose-prod.yml up --build -d
+sudo docker-compose -f docker-compose-prod.yml up --build -d
 ```
 - Stop container
 ```shell
-➜  ~ docker-compose down --remove-orphans
+sudo docker-compose down --remove-orphans
 ```
 - Generate a new django key and update prod dockerfile
 ```python
@@ -63,7 +59,7 @@ print(secrets.token_urlsafe(50))
 apt-get update
 apt-get install -y certbot python3-certbot-nginx
 # Stop your Docker containers temporarily:
-docker-compose down
+sudo docker-compose down
 sudo certbot --nginx -d pushmypost.com -d www.pushmypost.com
 ```
 
