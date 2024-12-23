@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "Entering recipe_research dir"
+echo "Entering project dir"
 # Navigate to your project directory
 cd /root/development/push-my-post/
 
