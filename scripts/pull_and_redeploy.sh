@@ -25,4 +25,4 @@ sudo docker-compose exec web python manage.py collectstatic --noinput
 
 echo "Tailing application log"
 # Tail log
-sudo docker logs --follow push-my-post-web-1
+sudo docker logs --follow push-my-post_web_1
