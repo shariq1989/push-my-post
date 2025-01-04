@@ -9,7 +9,6 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         suggest_boards()
-        print(response)
 
 
 def suggest_boards():
