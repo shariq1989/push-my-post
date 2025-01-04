@@ -17,7 +17,7 @@ def suggest_boards():
     print(f"Total blog posts to process: {blog_posts.count()}")
 
     try:
-        pin_user = PinUser.objects.get(user__username='shariq1989')
+        pin_user = PinUser.objects.get(user__username='shariq1989@gmail.com')
     except PinUser.DoesNotExist:
         print("No PinUser found for username shariq1989")
         return  # Exit the method if no PinUser exists
