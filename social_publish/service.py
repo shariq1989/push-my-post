@@ -3,7 +3,7 @@ import requests
 import base64
 import time
 import torch
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Union, Any, Optional
 from celery import shared_task
 from requests.exceptions import HTTPError
 from django.utils import timezone
