@@ -1,6 +1,5 @@
 from django.core.management.base import BaseCommand, CommandError
-from social_publish.service import suggest_pinterest_boards, get_pinterest_user_data, save_board_suggestions, \
-    suggest_pinterest_boards
+from social_publish.service import suggest_pinterest_boards, get_pinterest_user_data, suggest_pinterest_boards
 from site_scan.models import BlogPost
 from social_publish.models import PinUser
 
@@ -44,7 +43,7 @@ def suggest_boards():
             )
             # Save suggestions to database
             print(f"Suggestions for blog post {blog_post.id}: {suggestions}")
-            save_board_suggestions(blog_post, suggestions)
+            # ¸save_board_suggestions(blog_post, suggestions)
         except Exception as e:
             print(f"Error processing blog post {blog_post.id}: {e}")
             # Continue to next blog post if one fails
