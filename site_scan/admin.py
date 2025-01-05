@@ -13,7 +13,8 @@ class BlogPostAdmin(admin.ModelAdmin):
 
 class PinterestBoardSuggestionAdmin(admin.ModelAdmin):
     list_display = (
-        'blog_post',
+        'blog_post_title',
+        'blog_post_description',
         'board_name',
         'board_id',
         'match_score',
