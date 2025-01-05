@@ -11,6 +11,7 @@ from environs import Env
 from django.db import transaction
 from django.db.models import Q
 from sentence_transformers import SentenceTransformer, util
+from site_scan.models import PinterestBoardSuggestion, BlogPost
 
 from .models import PinBoard, PinUser, PinterestPin
 from site_scan.models import BlogPost, PinterestBoardSuggestion
@@ -320,8 +321,8 @@ def suggest_pinterest_boards(
     Suggest Pinterest boards based on semantic similarity to a blog post using PyTorch.
 
     Args:
-        blog_post: Dictionary containing blog post title and description
-        boards: List of Pinterest boards with their data (including a name and description)
+        blog_post: The blog post object containing title and description
+        boards: List of Pinterest boards with their data (including name and description)
         min_confidence: Minimum similarity threshold
         max_suggestions: Maximum number of board suggestions to return
 
@@ -373,6 +374,15 @@ def suggest_pinterest_boards(
 
         # Log suggestions
         logging.info(f"Found {len(sorted_suggestions)} board suggestions for post: {blog_post.title}")
+
+        # Save suggestions to PinterestBoardSuggestion
+        for suggestion in sorted_suggestions:
+            PinterestBoardSuggestion.objects.create(
+                blog_post=blog_post,
+                board_id=suggestion["board_id"],
+                board_name=suggestion["board_name"],
+                match_score=suggestion["match_score"]
+            )
 
         return sorted_suggestions
 
