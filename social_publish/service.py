@@ -28,6 +28,7 @@ TWITTER_API_KEY_SECRET = env("TWITTER_API_KEY_SECRET")
 TWITTER_BEARER_TOKEN = env("TWITTER_BEARER_TOKEN")
 TWITTER_ACCESS_TOKEN = env("TWITTER_ACCESS_TOKEN")
 TWITTER_ACCESS_TOKEN_SECRET = env("TWITTER_ACCESS_TOKEN_SECRET")
+MODEL = SentenceTransformer('all-MiniLM-L6-v2')
 
 # Global variables for rate limiting
 rate_limits = {
@@ -334,7 +335,6 @@ def initialize_embeddings(user_boards: List[Dict], model_name: str = 'all-MiniLM
 def suggest_pinterest_boards(
         blog_post: Dict[str, str],
         board_embeddings: List[Dict[str, Union[int, str, torch.Tensor]]],
-        model: SentenceTransformer,
         min_confidence: float = 0.5,
         max_suggestions: int = 3
 ) -> List[Dict[str, Union[int, str, float]]]:
@@ -344,13 +344,15 @@ def suggest_pinterest_boards(
     Args:
         blog_post: Dictionary containing blog post title and description
         board_embeddings: List of pre-computed board embeddings
-        model: Sentence Transformer model
         min_confidence: Minimum similarity threshold
         max_suggestions: Maximum number of board suggestions to return
 
     Returns:
         List of suggested boards with their match scores
     """
+    # Initialize the model
+    model = MODEL
+
     # Ensure we're using the same device for computations
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -366,7 +368,6 @@ def suggest_pinterest_boards(
         ])
 
         # Compute cosine similarities in a batch
-        # Unsqueeze post_embedding to match batch computation
         similarities = torch.nn.functional.cosine_similarity(
             post_embedding.unsqueeze(0),
             board_embeddings_tensor,
@@ -376,7 +377,6 @@ def suggest_pinterest_boards(
         # Create list of suggestions
         suggestions = []
         for idx, similarity in enumerate(similarities):
-            # Only add boards that meet the minimum confidence threshold
             if similarity.item() >= min_confidence:
                 suggestions.append({
                     "board_id": board_embeddings[idx]["board_id"],
