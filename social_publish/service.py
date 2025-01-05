@@ -333,7 +333,7 @@ def initialize_embeddings(user_boards: List[Dict], model_name: str = 'all-MiniLM
 
 
 def suggest_pinterest_boards(
-        blog_post: Dict[str, str],
+        blog_post: BlogPost,
         board_embeddings: List[Dict[str, Union[int, str, torch.Tensor]]],
         min_confidence: float = 0.5,
         max_suggestions: int = 3
@@ -357,7 +357,7 @@ def suggest_pinterest_boards(
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     # Create embedding for the blog post
-    post_text = f"{blog_post['title']} {blog_post['description']}"
+    post_text = f"{blog_post.title} {blog_post.description}"
     post_embedding = model.encode(post_text, convert_to_tensor=True).to(device)
 
     # Prepare board embeddings tensor
