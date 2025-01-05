@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
 from social_publish.service import suggest_pinterest_boards, get_pinterest_user_data, suggest_pinterest_boards
-from site_scan.models import BlogPost
+from site_scan.models import BlogPost, PinterestBoardSuggestion
 from social_publish.models import PinUser
 
 
@@ -29,6 +29,11 @@ def suggest_boards():
     except Exception as e:
         print(f"Error fetching Pinterest boards: {e}")
         return  # Exit if board fetching fails
+
+    # TODO: don't delete all
+    suggestions_to_delete = PinterestBoardSuggestion.objects.all()
+    # Delete the selected BlogPosts
+    suggestions_to_delete.delete()
 
     # Batch processing with error handling for each blog post
     for blog_post in blog_posts:
