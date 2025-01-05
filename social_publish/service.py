@@ -310,31 +310,9 @@ def get_pinterest_user_data(pin_user):
     return boards
 
 
-def initialize_embeddings(user_boards: List[Dict], model_name: str = 'all-MiniLM-L6-v2'):
-    if not user_boards:
-        raise ValueError("User boards list cannot be empty")
-
-    # Load the pre-trained Sentence Transformer model
-    try:
-        model = SentenceTransformer(model_name)
-    except Exception as e:
-        print(f"Error loading model: {e}")
-        raise
-    # Precompute embeddings for each board
-    board_embeddings = [
-        {
-            "board_id": board["id"],
-            "board_name": board["name"],
-            "embedding": model.encode(board["name"], convert_to_tensor=True)
-        }
-        for board in user_boards
-    ]
-    return model, board_embeddings
-
-
 def suggest_pinterest_boards(
         blog_post: BlogPost,
-        board_embeddings: List[Dict[str, Union[int, str, torch.Tensor]]],
+        boards: List[Dict[str, str]],
         min_confidence: float = 0.5,
         max_suggestions: int = 3
 ) -> List[Dict[str, Union[int, str, float]]]:
@@ -343,16 +321,14 @@ def suggest_pinterest_boards(
 
     Args:
         blog_post: Dictionary containing blog post title and description
-        board_embeddings: List of pre-computed board embeddings
+        boards: List of Pinterest boards with their data (including a name and description)
         min_confidence: Minimum similarity threshold
         max_suggestions: Maximum number of board suggestions to return
 
     Returns:
         List of suggested boards with their match scores
     """
-    # Initialize the model
     model = MODEL
-
     # Ensure we're using the same device for computations
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -362,12 +338,20 @@ def suggest_pinterest_boards(
 
     # Prepare board embeddings tensor
     try:
-        # Extract and stack board embeddings
-        board_embeddings_tensor = torch.stack([
-            board["embedding"].to(device) for board in board_embeddings
-        ])
+        # Prepare the board embeddings by encoding the board descriptions
+        board_embeddings = []
+        for board in boards:
+            board_text = f"{board['name']} {board.get('description', '')}"
+            board_embedding = model.encode(board_text, convert_to_tensor=True).to(device)
+            board_embeddings.append({
+                "board_id": board.get("id", ""),
+                "board_name": board.get("name", ""),
+                "embedding": board_embedding
+            })
 
         # Compute cosine similarities in a batch
+        board_embeddings_tensor = torch.stack([board["embedding"] for board in board_embeddings])
+
         similarities = torch.nn.functional.cosine_similarity(
             post_embedding.unsqueeze(0),
             board_embeddings_tensor,
@@ -385,11 +369,7 @@ def suggest_pinterest_boards(
                 })
 
         # Sort suggestions by match score and limit to max_suggestions
-        sorted_suggestions = sorted(
-            suggestions,
-            key=lambda x: x["match_score"],
-            reverse=True
-        )[:max_suggestions]
+        sorted_suggestions = sorted(suggestions, key=lambda x: x["match_score"], reverse=True)[:max_suggestions]
 
         # Log suggestions
         logging.info(f"Found {len(sorted_suggestions)} board suggestions for post: {blog_post['title']}")
