@@ -372,7 +372,7 @@ def suggest_pinterest_boards(
         sorted_suggestions = sorted(suggestions, key=lambda x: x["match_score"], reverse=True)[:max_suggestions]
 
         # Log suggestions
-        logging.info(f"Found {len(sorted_suggestions)} board suggestions for post: {blog_post['title']}")
+        logging.info(f"Found {len(sorted_suggestions)} board suggestions for post: {blog_post.title}")
 
         return sorted_suggestions
 
