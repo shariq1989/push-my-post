@@ -374,6 +374,11 @@ def suggest_pinterest_boards(
 
         # Log suggestions
         logging.info(f"Found {len(sorted_suggestions)} board suggestions for post: {blog_post.title}")
+        # TODO: don't delete all
+        suggestions_to_delete = PinterestBoardSuggestion.objects.all()
+
+        # Delete the selected BlogPosts
+        suggestions_to_delete.delete()
 
         # Save suggestions to PinterestBoardSuggestion
         for suggestion in sorted_suggestions:
