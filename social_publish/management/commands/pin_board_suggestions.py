@@ -58,7 +58,7 @@ def suggest_boards():
                     board_name=suggestion["board_name"],
                     match_score=suggestion["match_score"],
                 )
-            print(f"Suggestions for blog post {blog_post.id}: {suggestions}")
+            print(f"Suggestions for blog post {blog_post.title}: {suggestions}")
         except Exception as e:
-            print(f"Error processing blog post {blog_post.id}: {e}")
+            print(f"Error processing blog post {blog_post.title}: {e}")
             continue
