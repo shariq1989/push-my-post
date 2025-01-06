@@ -10,7 +10,7 @@ from .service import sanitize_url, parse_sitemap, fetch_sites, fetch_trending_po
     save_site
 from social_publish.service import pinterest_login, get_pinterest_user_data, create_board
 import sys
-from .models import Site, BlogPost
+from .models import Site, BlogPost, PinterestBoardSuggestion
 from social_publish.models import PinUser
 
 env = Env()
@@ -65,6 +65,15 @@ def scan_submit(request):
     request.session['posts_for_pinning'] = selected_posts_ids
     # TODO uncomment
     pin_user, created = PinUser.objects.get_or_create(user=request.user)
+
+    # Collect board suggestions for each selected post
+    post_suggestions = {}
+    for post in selected_posts:
+        suggestions = PinterestBoardSuggestion.objects.filter(blog_post=post).values(
+            'board_id', 'board_name', 'match_score', 'is_selected'
+        )
+        post_suggestions[post.id] = list(suggestions)
+
     if pin_user.access_token:
         boards = get_pinterest_user_data(pin_user)
         # pass
@@ -81,6 +90,7 @@ def scan_submit(request):
     context = {
         'posts': selected_posts,
         'boards': boards,
+        'board_suggestions': post_suggestions
     }
     return render(request, 'social_publish/pin_publish.html', context)
 
