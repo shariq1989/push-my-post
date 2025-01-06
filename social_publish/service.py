@@ -205,7 +205,7 @@ def request_pinterest(
             print(f'Pinterest request. Endpoint: {endpoint}, call: {call_type}, headers:{headers} data: {data}')
             raise Exception("Error fetching data from Pinterest") from e
 
-    print(f'Pinterest Response: {resp_json}')
+    # print(f'Pinterest Response: {resp_json}')
     return resp_json
 
 
@@ -311,26 +311,40 @@ def get_pinterest_user_data(pin_user):
     return boards
 
 
+def precompute_board_embeddings(boards):
+    """
+    Precompute embeddings for Pinterest boards.
+    Args:
+        boards: List of Pinterest boards with their data.
+
+    Returns:
+        List of dictionaries containing board info and embeddings.
+    """
+    model = MODEL
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+    board_embeddings = []
+    for board in boards:
+        board_text = f"{board['name']} {board.get('description', '')}"
+        board_embedding = model.encode(board_text, convert_to_tensor=True).to(device)
+        board_embeddings.append({
+            "board_id": board.get("id", ""),
+            "board_name": board.get("name", ""),
+            "embedding": board_embedding
+        })
+    return board_embeddings
+
+
 def suggest_pinterest_boards(
         blog_post: BlogPost,
-        boards: List[Dict[str, str]],
+        board_embeddings: List[Dict[str, Union[str, torch.Tensor]]],
         min_confidence: float = 0.5,
         max_suggestions: int = 3
 ) -> List[Dict[str, Union[int, str, float]]]:
     """
-    Suggest Pinterest boards based on semantic similarity to a blog post using PyTorch.
-
-    Args:
-        blog_post: The blog post object containing title and description
-        boards: List of Pinterest boards with their data (including name and description)
-        min_confidence: Minimum similarity threshold
-        max_suggestions: Maximum number of board suggestions to return
-
-    Returns:
-        List of suggested boards with their match scores
+    Suggest Pinterest boards based on semantic similarity to a blog post using precomputed embeddings.
     """
     model = MODEL
-    # Ensure we're using the same device for computations
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     # Create embedding for the blog post
@@ -339,51 +353,26 @@ def suggest_pinterest_boards(
 
     # Prepare board embeddings tensor
     try:
-        # Prepare the board embeddings by encoding the board descriptions
-        board_embeddings = []
-        for board in boards:
-            board_text = f"{board['name']} {board.get('description', '')}"
-            board_embedding = model.encode(board_text, convert_to_tensor=True).to(device)
-            board_embeddings.append({
-                "board_id": board.get("id", ""),
-                "board_name": board.get("name", ""),
-                "embedding": board_embedding
-            })
-
-        # Compute cosine similarities in a batch
         board_embeddings_tensor = torch.stack([board["embedding"] for board in board_embeddings])
 
+        # Compute cosine similarities
         similarities = torch.nn.functional.cosine_similarity(
             post_embedding.unsqueeze(0),
             board_embeddings_tensor,
             dim=1
         )
 
-        # Create list of suggestions
-        suggestions = []
-        for idx, similarity in enumerate(similarities):
-            if similarity.item() >= min_confidence:
-                suggestions.append({
-                    "board_id": board_embeddings[idx]["board_id"],
-                    "board_name": board_embeddings[idx]["board_name"],
-                    "match_score": similarity.item()
-                })
+        # Filter and sort suggestions
+        suggestions = [
+            {
+                "board_id": board_embeddings[idx]["board_id"],
+                "board_name": board_embeddings[idx]["board_name"],
+                "match_score": similarity.item(),
+            }
+            for idx, similarity in enumerate(similarities) if similarity.item() >= min_confidence
+        ]
 
-        # Sort suggestions by match score and limit to max_suggestions
         sorted_suggestions = sorted(suggestions, key=lambda x: x["match_score"], reverse=True)[:max_suggestions]
-
-        # Log suggestions
-        logging.info(f"Found {len(sorted_suggestions)} board suggestions for post: {blog_post.title}")
-
-        # Save suggestions to PinterestBoardSuggestion
-        for suggestion in sorted_suggestions:
-            PinterestBoardSuggestion.objects.create(
-                blog_post=blog_post,
-                board_id=suggestion["board_id"],
-                board_name=suggestion["board_name"],
-                match_score=suggestion["match_score"]
-            )
-
         return sorted_suggestions
 
     except Exception as e:
