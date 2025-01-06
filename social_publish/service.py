@@ -338,7 +338,7 @@ def precompute_board_embeddings(boards):
 def suggest_pinterest_boards(
         blog_post: BlogPost,
         board_embeddings: List[Dict[str, Union[str, torch.Tensor]]],
-        min_confidence: float = 0.5,
+        min_confidence: float = 0.3,
         max_suggestions: int = 3
 ) -> List[Dict[str, Union[int, str, float]]]:
     """
