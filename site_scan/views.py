@@ -63,6 +63,7 @@ def scan_submit(request):
     selected_posts = BlogPost.objects.filter(pk__in=selected_posts_ids)
     print(f"User selected posts {selected_posts}")
     request.session['posts_for_pinning'] = selected_posts_ids
+
     pin_user, created = PinUser.objects.get_or_create(user=request.user)
 
     if pin_user.access_token:
@@ -70,7 +71,7 @@ def scan_submit(request):
         suggestions = {}  # to hold suggestions for each post
 
         for post in selected_posts:
-            # Get board suggestions for each post
+            # Get board suggestions for each post and store them
             post_suggestions = PinterestBoardSuggestion.objects.filter(blog_post=post)
             suggestions[post.id] = post_suggestions
 
@@ -86,8 +87,8 @@ def scan_submit(request):
     # ]
     context = {
         'posts': selected_posts,
-        'boards': boards,
-        'board_suggestions': suggestions
+        'boards': boards,  # user's Pinterest boards
+        'post_suggestions': suggestions,  # Pinterest board suggestions
     }
     return render(request, 'social_publish/pin_publish.html', context)
 

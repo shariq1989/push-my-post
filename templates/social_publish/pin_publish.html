@@ -66,11 +66,12 @@
                                     {{ board.name }}
                                 </option>
                                 {% endfor %}
-                                <!-- Display suggested boards (in the same box) -->
-                                {% for suggestion in board_suggestions|get:post.id %}
-                                <option value="{{ suggestion.board_id }}" selected>
-                                    {{ suggestion.board_name }} (Suggested)
-                                </option>
+                                {% for post in posts %}
+                                    {% for suggestion in post_suggestions|get_item:post.id %}
+                                        <option value="{{ suggestion.board_id }}" selected>
+                                            {{ suggestion.board_name }} (Suggested)
+                                        </option>
+                                    {% endfor %}
                                 {% endfor %}
                             </select>
                         </div>
