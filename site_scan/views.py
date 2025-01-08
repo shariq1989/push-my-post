@@ -74,7 +74,7 @@ def scan_submit(request):
             # Get board suggestions for each post and store them
             post_suggestions = PinterestBoardSuggestion.objects.filter(blog_post=post)
             if post_suggestions:
-                print(post_suggestions)
+                print(f'Suggestions for {post.title}: {post_suggestions}')
             suggestions[post.id] = post_suggestions
 
     else:
