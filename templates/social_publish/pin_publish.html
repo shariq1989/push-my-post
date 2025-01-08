@@ -67,7 +67,7 @@
                                 </option>
                                 {% endfor %}
                                 {% for post in posts %}
-                                    {% for suggestion in post_suggestions|get_item:post.id %}
+                                    {% for suggestion in post_suggestions.post.id %}
                                         <option value="{{ suggestion.board_id }}" selected>
                                             {{ suggestion.board_name }} (Suggested)
                                         </option>
