@@ -201,7 +201,7 @@
 
             // Add Pinterest board suggestions dynamically
             {% for post in posts %}
-                {% for suggestion in board_suggestions|get:post.id %}
+                {% for suggestion in post_suggestions.post.id %}
                     const suggestionOption = document.createElement('option');
                     suggestionOption.value = suggestion.board_id;
                     suggestionOption.textContent = suggestion.board_name + ' (Suggested)';
