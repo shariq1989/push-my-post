@@ -55,24 +55,13 @@
                                 </textarea>
                     </div>
                     <div class="row">
+                        {{ }}
                         <label for="board_{{ post.id }}" class="form-label">Board</label>
                         <div class="col-8">
                             <select class="js-example-basic-multiple" id="board_{{ post.id }}"
                                     name="boards_{{ post.id }}[]"
                                     multiple="multiple"
                                     style="width: 100%">
-                                {% for board in boards %}
-                                <option value="{{ board.id }}" {% if board.id in post.boards %}selected{% endif %}>
-                                    {{ board.name }}
-                                </option>
-                                {% endfor %}
-                                {% for post in posts %}
-                                    {% for suggestion in post_suggestions.post.id %}
-                                        <option value="{{ suggestion.board_id }}" selected>
-                                            {{ suggestion.board_name }} (Suggested)
-                                        </option>
-                                    {% endfor %}
-                                {% endfor %}
                             </select>
                         </div>
                         <div class="col-4">

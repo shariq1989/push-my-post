@@ -72,11 +72,7 @@ def scan_submit(request):
 
         for post in selected_posts:
             # Get board suggestions for each post and store them
-            post_suggestions = PinterestBoardSuggestion.objects.filter(blog_post=post)
-            if post_suggestions:
-                print(f'Suggestions for {post.title}: {post_suggestions}')
-            suggestions[post.id] = post_suggestions
-
+            post.suggestions = PinterestBoardSuggestion.objects.filter(blog_post=post)
     else:
         return pinterest_login()
         # pass
@@ -89,8 +85,7 @@ def scan_submit(request):
     # ]
     context = {
         'posts': selected_posts,
-        'boards': boards,  # user's Pinterest boards
-        'post_suggestions': suggestions,  # Pinterest board suggestions
+        'boards': boards,
     }
     return render(request, 'social_publish/pin_publish.html', context)
 
