@@ -55,7 +55,9 @@
                                 </textarea>
                     </div>
                     <div class="row">
-                        {{ post.suggestions }}
+                        {% for suggestion in post.suggestions %}
+                        <p>Matched Board {% suggestion.board_name %}</p>
+                        {% endfor %}
                         <label for="board_{{ post.id }}" class="form-label">Board</label>
                         <div class="col-8">
                             <select class="js-example-basic-multiple" id="board_{{ post.id }}"
