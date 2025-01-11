@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from django.db.models import Q, prefetch_related
+from django.db.models import Q, Prefetch
 from django.http import JsonResponse, HttpResponseBadRequest
 import json
 # from PIL import Image, ImageFont, ImageDraw
