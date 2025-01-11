@@ -81,9 +81,9 @@ def scan_submit(request):
             # Annotate boards with 'selected' status
             post.boards = [
                 {
-                    "id": board.id,
-                    "name": board.name,
-                    "selected": any(suggestion.board_id == board.id for suggestion in suggestions),
+                    "id": board['id'],  # Access dictionary keys
+                    "name": board['name'],  # Access dictionary keys
+                    "selected": any(suggestion.board_id == board['id'] for suggestion in suggestions),
                 }
                 for board in boards
             ]
