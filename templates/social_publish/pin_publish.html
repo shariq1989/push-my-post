@@ -57,6 +57,11 @@
                     <div class="row">
                         <label for="board_{{ post.id }}" class="form-label">Board</label>
                         <div class="col-8">
+                            {% for board in post.boards %}
+                            {% if board.selected %}
+                            <p>board.name</p>
+                            {% endif %}
+                            {% endfor %}
                             <select class="js-example-basic-multiple" id="board_{{ post.id }}"
                                     name="boards_{{ post.id }}[]"
                                     multiple="multiple"
