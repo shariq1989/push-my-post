@@ -64,6 +64,11 @@
                                     name="boards_{{ post.id }}[]"
                                     multiple="multiple"
                                     style="width: 100%">
+                                {% for board in boards %}
+                                <option value="{{ board.id }}" {% if board.id in post.boards %}selected{% endif %}>
+                                    {{ board.name }}
+                                </option>
+                                {% endfor %}
                             </select>
                         </div>
                         <div class="col-4">
@@ -189,16 +194,6 @@
                 option.textContent = board.name;
                 dropdown.appendChild(option);
             });
-
-            // Add Pinterest board suggestions dynamically
-            {% for post in posts %}
-                {% for suggestion in post_suggestions.post.id %}
-                    const suggestionOption = document.createElement('option');
-                    suggestionOption.value = suggestion.board_id;
-                    suggestionOption.textContent = suggestion.board_name + ' (Suggested)';
-                    dropdown.appendChild(suggestionOption);
-                {% endfor %}
-            {% endfor %}
         });
     }
 
