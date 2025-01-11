@@ -60,7 +60,13 @@ def update_boards_list(request):
 
 def scan_submit(request):
     selected_posts_ids = request.POST.getlist('selected_pages')
-    selected_posts = BlogPost.objects.filter(pk__in=selected_posts_ids)
+    selected_posts = BlogPost.objects.filter(pk__in=selected_posts_ids).prefetch_related(
+        Prefetch(
+            'pinterestboardsuggestion_set',  # Related name for suggestions
+            queryset=PinterestBoardSuggestion.objects.all(),
+            to_attr='suggestions',
+        )
+    )
     request.session['posts_for_pinning'] = selected_posts_ids
 
     pin_user, created = PinUser.objects.get_or_create(user=request.user)
@@ -69,9 +75,10 @@ def scan_submit(request):
         boards = get_pinterest_user_data(pin_user)
 
         for post in selected_posts:
-            # Get suggestions for the current post
-            suggestions = PinterestBoardSuggestion.objects.filter(blog_post=post)
-            # Annotate boards with 'selected' status based on suggestions
+            # Use prefetched suggestions
+            suggestions = post.suggestions
+
+            # Annotate boards with 'selected' status
             post.boards = [
                 {
                     "id": board.id,
