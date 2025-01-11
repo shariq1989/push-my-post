@@ -61,18 +61,25 @@ def update_boards_list(request):
 def scan_submit(request):
     selected_posts_ids = request.POST.getlist('selected_pages')
     selected_posts = BlogPost.objects.filter(pk__in=selected_posts_ids)
-    # print(f"User selected posts {selected_posts}")
     request.session['posts_for_pinning'] = selected_posts_ids
 
     pin_user, created = PinUser.objects.get_or_create(user=request.user)
 
     if pin_user.access_token:
         boards = get_pinterest_user_data(pin_user)
-        suggestions = {}  # to hold suggestions for each post
 
         for post in selected_posts:
-            # Get board suggestions for each post and store them
-            post.suggestions = PinterestBoardSuggestion.objects.filter(blog_post=post)
+            # Get suggestions for the current post
+            suggestions = PinterestBoardSuggestion.objects.filter(blog_post=post)
+            # Annotate boards with 'selected' status based on suggestions
+            post.boards = [
+                {
+                    "id": board.id,
+                    "name": board.name,
+                    "selected": any(suggestion.board_id == board.id for suggestion in suggestions),
+                }
+                for board in boards
+            ]
     else:
         return pinterest_login()
         # pass
@@ -85,7 +92,6 @@ def scan_submit(request):
     # ]
     context = {
         'posts': selected_posts,
-        'boards': boards,
     }
     return render(request, 'social_publish/pin_publish.html', context)
 
