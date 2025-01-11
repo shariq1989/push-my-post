@@ -2,13 +2,19 @@ import logging
 import requests
 import base64
 import time
-from typing import Dict, Any, Optional
+import torch
+from typing import List, Dict, Union, Any, Optional
 from celery import shared_task
 from requests.exceptions import HTTPError
 from django.utils import timezone
 from environs import Env
 from django.db import transaction
+from django.db.models import Q
+from sentence_transformers import SentenceTransformer, util
+from site_scan.models import PinterestBoardSuggestion, BlogPost
+
 from .models import PinBoard, PinUser, PinterestPin
+from site_scan.models import BlogPost, PinterestBoardSuggestion
 from django.http import HttpResponseRedirect
 
 logger = logging.getLogger(__name__)
@@ -23,6 +29,7 @@ TWITTER_API_KEY_SECRET = env("TWITTER_API_KEY_SECRET")
 TWITTER_BEARER_TOKEN = env("TWITTER_BEARER_TOKEN")
 TWITTER_ACCESS_TOKEN = env("TWITTER_ACCESS_TOKEN")
 TWITTER_ACCESS_TOKEN_SECRET = env("TWITTER_ACCESS_TOKEN_SECRET")
+MODEL = SentenceTransformer('all-MiniLM-L6-v2')
 
 # Global variables for rate limiting
 rate_limits = {
@@ -198,7 +205,7 @@ def request_pinterest(
             print(f'Pinterest request. Endpoint: {endpoint}, call: {call_type}, headers:{headers} data: {data}')
             raise Exception("Error fetching data from Pinterest") from e
 
-    print(f'Pinterest Response: {resp_json}')
+    # print(f'Pinterest Response: {resp_json}')
     return resp_json
 
 
@@ -302,3 +309,72 @@ def get_pinterest_user_data(pin_user):
     boards = get_boards(pin_user)
     # logger.info(f"Boards from pinterest {boards}")
     return boards
+
+
+def precompute_board_embeddings(boards):
+    """
+    Precompute embeddings for Pinterest boards.
+    Args:
+        boards: List of Pinterest boards with their data.
+
+    Returns:
+        List of dictionaries containing board info and embeddings.
+    """
+    model = MODEL
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+    board_embeddings = []
+    for board in boards:
+        board_text = f"{board['name']} {board.get('description', '')}"
+        board_embedding = model.encode(board_text, convert_to_tensor=True).to(device)
+        board_embeddings.append({
+            "board_id": board.get("id", ""),
+            "board_name": board.get("name", ""),
+            "embedding": board_embedding
+        })
+    return board_embeddings
+
+
+def suggest_pinterest_boards(
+        blog_post: BlogPost,
+        board_embeddings: List[Dict[str, Union[str, torch.Tensor]]],
+        min_confidence: float = 0.2,
+        max_suggestions: int = 3
+) -> List[Dict[str, Union[int, str, float]]]:
+    """
+    Suggest Pinterest boards based on semantic similarity to a blog post using precomputed embeddings.
+    """
+    model = MODEL
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+    # Create embedding for the blog post
+    post_text = f"{blog_post.title} {blog_post.description}"
+    post_embedding = model.encode(post_text, convert_to_tensor=True).to(device)
+
+    # Prepare board embeddings tensor
+    try:
+        board_embeddings_tensor = torch.stack([board["embedding"] for board in board_embeddings])
+
+        # Compute cosine similarities
+        similarities = torch.nn.functional.cosine_similarity(
+            post_embedding.unsqueeze(0),
+            board_embeddings_tensor,
+            dim=1
+        )
+
+        # Filter and sort suggestions
+        suggestions = [
+            {
+                "board_id": board_embeddings[idx]["board_id"],
+                "board_name": board_embeddings[idx]["board_name"],
+                "match_score": similarity.item(),
+            }
+            for idx, similarity in enumerate(similarities) if similarity.item() >= min_confidence
+        ]
+
+        sorted_suggestions = sorted(suggestions, key=lambda x: x["match_score"], reverse=True)[:max_suggestions]
+        return sorted_suggestions
+
+    except Exception as e:
+        logging.error(f"Error in suggesting Pinterest boards: {e}")
+        raise

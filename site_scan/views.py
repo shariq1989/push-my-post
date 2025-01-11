@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from django.db.models import Q
+from django.db.models import Q, Prefetch
 from django.http import JsonResponse, HttpResponseBadRequest
 import json
 # from PIL import Image, ImageFont, ImageDraw
@@ -10,7 +10,7 @@ from .service import sanitize_url, parse_sitemap, fetch_sites, fetch_trending_po
     save_site
 from social_publish.service import pinterest_login, get_pinterest_user_data, create_board
 import sys
-from .models import Site, BlogPost
+from .models import Site, BlogPost, PinterestBoardSuggestion
 from social_publish.models import PinUser
 
 env = Env()
@@ -60,14 +60,33 @@ def update_boards_list(request):
 
 def scan_submit(request):
     selected_posts_ids = request.POST.getlist('selected_pages')
-    selected_posts = BlogPost.objects.filter(pk__in=selected_posts_ids)
-    print(f"User selected posts {selected_posts}")
+    selected_posts = BlogPost.objects.filter(pk__in=selected_posts_ids).prefetch_related(
+        Prefetch(
+            'board_suggestions',  # Related name for suggestions
+            queryset=PinterestBoardSuggestion.objects.all(),
+            to_attr='suggestions',
+        )
+    )
     request.session['posts_for_pinning'] = selected_posts_ids
-    # TODO uncomment
+
     pin_user, created = PinUser.objects.get_or_create(user=request.user)
+
     if pin_user.access_token:
         boards = get_pinterest_user_data(pin_user)
-        # pass
+
+        for post in selected_posts:
+            # Use prefetched suggestions
+            suggestions = post.suggestions
+
+            # Annotate boards with 'selected' status
+            post.boards = [
+                {
+                    "id": board['id'],  # Access dictionary keys
+                    "name": board['name'],  # Access dictionary keys
+                    "selected": any(suggestion.board_id == board['id'] for suggestion in suggestions),
+                }
+                for board in boards
+            ]
     else:
         return pinterest_login()
         # pass
@@ -80,7 +99,6 @@ def scan_submit(request):
     # ]
     context = {
         'posts': selected_posts,
-        'boards': boards,
     }
     return render(request, 'social_publish/pin_publish.html', context)
 

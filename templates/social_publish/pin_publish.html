@@ -61,17 +61,17 @@
                                     name="boards_{{ post.id }}[]"
                                     multiple="multiple"
                                     style="width: 100%">
-                                {% for board in boards %}
-                                <option value="{{ board.id }}" {% if board.id in post.boards %}selected{% endif %}>
+                                {% for board in post.boards %}
+                                <option value="{{ board.id }}" {% if board.selected %}selected{% endif %}>
                                     {{ board.name }}
                                 </option>
-
                                 {% endfor %}
                             </select>
                         </div>
                         <div class="col-4">
                             <a class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createBoardModal">
-                                Create new board</a>
+                                Create new board
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -127,16 +127,18 @@
 </div>
 <script>
     $(document).ready(function() {
-        $('.js-example-basic-multiple').select2();
+        $('.js-example-basic-multiple').select2({
+            placeholder: "Search or select boards",
+            allowClear: true
+        });
     });
 
+    // Function to create a new board and update dropdowns
     function newBoardJS() {
-        // Get values from form
         const title = document.getElementById('boardName').value;
         const description = document.getElementById('boardDescription').value;
         const privacy = document.getElementById('boardPrivacy').value;
 
-        // Validate that required fields are filled
         if (!title || !description) {
             alert('Please fill in all required fields');
             return;
@@ -144,7 +146,6 @@
 
         const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
-        // Build the request to create the board
         const url = `/scan/create_board/`;
         const options = {
             method: 'POST',
@@ -152,17 +153,14 @@
                 'X-CSRFToken': csrfToken,
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({
-                title,
-                description
-            }),
+            body: JSON.stringify({ title, description }),
             credentials: 'same-origin'
         };
+
         fetch(url, options)
         .then(response => response.json())
         .then(data => {
             if (data.boards) {
-                // Use the updated list of boards from the response
                 updateBoardDropdowns(data.boards);
 
                 // Close the modal
@@ -179,23 +177,18 @@
             console.error(`Error creating board: ${error}`);
         });
     }
+
     function updateBoardDropdowns(boards) {
-        // Select all elements with an id starting with "board_"
         const dropdowns = document.querySelectorAll('select[id^="board_"]');
 
         dropdowns.forEach(dropdown => {
-            // Clear existing options in each dropdown
-            dropdown.innerHTML = '';
+            dropdown.innerHTML = '';  // Clear existing options
 
-            // Populate each dropdown with new board options
+            // Add current boards
             boards.forEach(board => {
                 const option = document.createElement('option');
                 option.value = board.id;
                 option.textContent = board.name;
-
-                // Set option as selected if needed (replace with actual selection logic)
-                // option.selected = someCondition;
-
                 dropdown.appendChild(option);
             });
         });

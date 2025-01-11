@@ -25,3 +25,23 @@ class BlogPost(models.Model):
 
     def __str__(self):
         return f"{self.site}, {self.title}, {self.description}"
+
+
+class PinterestBoardSuggestion(models.Model):
+    """
+    Stores individual board suggestions for a blog post
+    """
+    blog_post = models.ForeignKey(
+        'BlogPost',
+        on_delete=models.CASCADE,
+        related_name='board_suggestions'
+    )
+    board_id = models.CharField(max_length=255)
+    board_name = models.CharField(max_length=255)
+    match_score = models.FloatField()
+    is_selected = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('blog_post', 'board_id')
+        ordering = ['-match_score']
