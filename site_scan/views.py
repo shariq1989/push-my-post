@@ -62,7 +62,7 @@ def scan_submit(request):
     selected_posts_ids = request.POST.getlist('selected_pages')
     selected_posts = BlogPost.objects.filter(pk__in=selected_posts_ids).prefetch_related(
         Prefetch(
-            'pinterestboardsuggestion_set',  # Related name for suggestions
+            'board_suggestions',  # Related name for suggestions
             queryset=PinterestBoardSuggestion.objects.all(),
             to_attr='suggestions',
         )
