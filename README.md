@@ -152,6 +152,25 @@ sudo docker cp backup.sql edd255f87e94:/
 sudo docker exec 5ca62fdcdefe psql -U postgres -d postgres -f /backup.sql
 
 ```
+### Loading Database Fixtures
+Follow these steps to load the Django fixture data:
+
+1. Obtain the Django data dump file: 
+```
+trends_rtw_dump.json
+```
+2. Copy the file to your server:
+```shell
+scp trends_rtw_dump.json user@your-server:/root/
+```
+3. Copy the file into the Docker web container:
+```shell
+docker cp /root/trends_rtw_dump.json $(docker-compose ps -q web):/tmp/rtw.json
+```
+4. Load the fixture data using Django's loaddata command:
+```shell
+docker-compose exec web python manage.py loaddata /tmp/rtw.json
+```
 
 ### Delete today's Trending KW
 
