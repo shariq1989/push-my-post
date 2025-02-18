@@ -186,7 +186,9 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'mail@pushmypost.com'
 EMAIL_HOST_PASSWORD = MAILGUN_KEY
-DEFAULT_FROM_EMAIL = 'mail@your_domain.com'
+DEFAULT_FROM_EMAIL = 'mail@pushmypost.com'
+SERVER_EMAIL = "mail@pushmypost.com"
+ACCOUNT_EMAIL_SUBJECT_PREFIX = "[PushMyPost] "
 
 AUTH_USER_MODEL = "accounts.CustomUser"
 LOGIN_REDIRECT_URL = "scan/home"
