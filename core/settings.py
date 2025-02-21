@@ -191,7 +191,7 @@ SERVER_EMAIL = "mail@pushmypost.com"
 ACCOUNT_EMAIL_SUBJECT_PREFIX = "[PushMyPost] "
 
 AUTH_USER_MODEL = "accounts.CustomUser"
-LOGIN_REDIRECT_URL = "scan/home"
+LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
 SITE_ID = 1
 # https://django-allauth.readthedocs.io/en/latest/configuration.html
@@ -201,7 +201,6 @@ ACCOUNT_AUTHENTICATION_METHOD = "email"
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_EMAIL_VERIFICATION = "mandatory"
-
 
 # Celery settings
 CELERY_BROKER_URL = 'redis://redis:6379/0'

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="auth-container">
+  <div class="auth-box">
+    <h2>{% block auth_title %}{% endblock %}</h2>
+    
+    {% block auth_content %}
+      <form class="auth-form" method="POST">
+        {% csrf_token %}
+        {{ form.as_p }}
+        {% block form_buttons %}
+          <button type="submit" class="auth-button">Submit</button>
+        {% endblock %}
+      </form>
+    {% endblock %}
+    
+    {% block auth_links %}{% endblock %}
+  </div>
+</div>
+{% endblock %}
